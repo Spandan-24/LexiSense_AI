@@ -1,0 +1,12 @@
+# ── Required ──────────────────────────────────────────────
+flask>=2.3.0
+flask-cors>=4.0.0
+flask-sqlalchemy>=3.0.0
+werkzeug>=2.3.0
+
+# ── Optional but highly recommended ───────────────────────
+gtts>=2.3.0                  # Bengali + multilingual TTS audio download
+googletrans==4.0.0-rc1       # Universal translator (MUST be this exact version)
+reportlab>=3.6.0             # PDF export
+Pillow>=9.0.0                # Image processing (required for OCR)
+pytesseract>=0.3.10          # Real OCR (also needs Tesseract binary installed)

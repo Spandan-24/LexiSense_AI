@@ -1,0 +1,1842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>LexiSense AI — Intelligent Dyslexia Reading Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Lexend:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════════════
+   DESIGN SYSTEM — Deep Indigo + Bioluminescent Teal
+   Aesthetic: Premium Dark · Organic Glow · Editorial
+═══════════════════════════════════════════════════ */
+:root{
+  --ink:#04040C;--ink2:#080818;--ink3:#0C0C22;--ink4:#10102E;
+  --surface:#12122A;--surface2:#16163A;--surface3:#1A1A48;
+  --glow:#7B6FFF;--glow2:#A89DFF;--teal:#00E5CC;--teal2:#00B5A3;
+  --rose:#FF6B8A;--amber:#FFB347;--emerald:#00D68F;
+  --border:rgba(123,111,255,0.18);--border2:rgba(0,229,204,0.15);
+  --text:#F0EEFF;--text2:#B8B0FF;--text3:#7872AA;--text4:#3D3870;
+  --r:16px;--rs:10px;--shadow:0 12px 48px rgba(0,0,0,0.6);
+  --fs:18px;--lh:2.2;--ff:'Lexend';
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Outfit',sans-serif;background:var(--ink);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* ── Animated mesh background ──────────────────── */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 5%,  rgba(123,111,255,.14) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 90%,  rgba(0,229,204,.09)  0%,transparent 60%),
+    radial-gradient(ellipse 40% 40% at 50% 50%,  rgba(255,107,138,.04) 0%,transparent 60%);
+  animation:meshPulse 18s ease-in-out infinite alternate;
+}
+@keyframes meshPulse{
+  0%  {opacity:1;}
+  50% {opacity:.65;}
+  100%{opacity:1;}
+}
+/* Grain overlay */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.025;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+}
+
+/* ── Floating orbs ──────────────────────────────── */
+.orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;animation:orbDrift ease-in-out infinite alternate;}
+.orb1{width:600px;height:600px;background:rgba(123,111,255,.08);top:-200px;left:-200px;animation-duration:25s;}
+.orb2{width:500px;height:500px;background:rgba(0,229,204,.06);bottom:-150px;right:-150px;animation-duration:20s;}
+.orb3{width:300px;height:300px;background:rgba(255,107,138,.05);top:40%;left:40%;animation-duration:15s;}
+@keyframes orbDrift{0%{transform:translate(0,0) scale(1);}100%{transform:translate(30px,20px) scale(1.1);}}
+
+/* ── AUTH SCREEN ─────────────────────────────────── */
+#authScreen{
+  position:fixed;inset:0;background:var(--ink);z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+}
+.auth-wrap{width:440px;max-width:95vw;position:relative;z-index:1;}
+.auth-brand{text-align:center;margin-bottom:36px;}
+.auth-logo-box{
+  width:80px;height:80px;margin:0 auto 18px;border-radius:24px;
+  background:linear-gradient(135deg,var(--glow),var(--teal));
+  display:flex;align-items:center;justify-content:center;font-size:36px;
+  box-shadow:0 0 60px rgba(123,111,255,.5);
+  animation:logoPulse 3s ease-in-out infinite;
+}
+@keyframes logoPulse{0%,100%{box-shadow:0 0 40px rgba(123,111,255,.4);}50%{box-shadow:0 0 80px rgba(123,111,255,.8);}}
+.auth-title{font-family:'Playfair Display',serif;font-size:32px;font-weight:900;
+  background:linear-gradient(135deg,var(--glow2),var(--teal));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.auth-sub{color:var(--text3);font-size:13px;margin-top:6px;letter-spacing:.5px;}
+.auth-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:24px;padding:36px;position:relative;overflow:hidden;
+}
+.auth-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--glow),var(--teal),var(--glow));
+}
+.auth-tabs{display:flex;gap:4px;background:var(--ink3);padding:4px;border-radius:12px;margin-bottom:28px;}
+.auth-tab{
+  flex:1;padding:10px;border-radius:9px;text-align:center;font-size:13px;
+  font-weight:700;cursor:pointer;color:var(--text3);transition:all .25s;
+  font-family:'Outfit',sans-serif;letter-spacing:.3px;
+}
+.auth-tab.active{background:var(--surface2);color:var(--text);box-shadow:0 2px 12px rgba(0,0,0,.4);}
+.auth-form{display:flex;flex-direction:column;gap:14px;}
+.field-wrap{position:relative;}
+.field-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;z-index:1;}
+.field{
+  width:100%;background:var(--ink3);border:1.5px solid var(--border);
+  border-radius:12px;padding:13px 14px 13px 44px;color:var(--text);
+  font-family:'Outfit',sans-serif;font-size:14px;outline:none;transition:all .25s;
+}
+.field:focus{border-color:var(--glow);box-shadow:0 0 20px rgba(123,111,255,.2);}
+.field::placeholder{color:var(--text4);}
+.auth-btn{
+  padding:14px;border-radius:12px;font-size:15px;font-weight:700;
+  cursor:pointer;border:none;font-family:'Outfit',sans-serif;letter-spacing:.4px;
+  background:linear-gradient(135deg,var(--glow),var(--teal));color:#fff;
+  transition:all .25s;position:relative;overflow:hidden;
+}
+.auth-btn::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,0);transition:background .25s;}
+.auth-btn:hover::before{background:rgba(255,255,255,.08);}
+.auth-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(123,111,255,.5);}
+.auth-err{color:var(--rose);font-size:12px;text-align:center;min-height:18px;}
+.auth-skip{text-align:center;margin-top:16px;font-size:12px;color:var(--text3);}
+.auth-skip a{color:var(--glow2);cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
+
+/* ── SIDEBAR ─────────────────────────────────────── */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;width:268px;
+  background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:100;
+}
+.sidebar::before{
+  content:'';position:absolute;top:0;left:0;bottom:0;width:1px;
+  background:linear-gradient(to bottom,transparent,var(--glow),var(--teal),transparent);
+  opacity:.4;
+}
+.sb-logo{padding:24px 18px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+.sb-logo-icon{
+  width:44px;height:44px;border-radius:13px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--glow),var(--teal));
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+  animation:logoPulse 3s ease-in-out infinite;
+}
+.sb-logo-name{font-family:'Playfair Display',serif;font-size:17px;font-weight:800;
+  background:linear-gradient(135deg,var(--glow2),var(--teal));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.sb-logo-sub{font-size:10px;color:var(--text4);margin-top:2px;letter-spacing:.5px;}
+.sb-nav{flex:1;padding:14px 10px;overflow-y:auto;}
+.sb-section{margin-bottom:20px;}
+.sb-label{
+  font-size:9px;font-weight:800;color:var(--text4);
+  letter-spacing:2px;text-transform:uppercase;padding:0 10px;margin-bottom:6px;
+}
+.sb-item{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  border-radius:11px;cursor:pointer;transition:all .2s;
+  font-size:13px;color:var(--text2);font-weight:600;margin-bottom:2px;position:relative;
+}
+.sb-item:hover{background:var(--surface2);color:var(--text);}
+.sb-item.active{
+  background:linear-gradient(135deg,rgba(123,111,255,.2),rgba(0,229,204,.08));
+  color:var(--glow2);border:1px solid rgba(123,111,255,.25);
+}
+.sb-item.active::before{
+  content:'';position:absolute;left:-10px;top:50%;transform:translateY(-50%);
+  width:3px;height:22px;background:linear-gradient(to bottom,var(--glow),var(--teal));
+  border-radius:0 2px 2px 0;
+}
+.sb-icon{font-size:16px;width:20px;text-align:center;}
+.sb-badge{
+  margin-left:auto;font-size:10px;font-weight:800;padding:2px 8px;
+  border-radius:20px;letter-spacing:.3px;
+}
+.sb-badge.ai{background:rgba(123,111,255,.25);color:var(--glow2);}
+.sb-badge.new{background:rgba(0,229,204,.2);color:var(--teal);}
+.sb-badge.hot{background:rgba(255,107,138,.2);color:var(--rose);}
+.sb-footer{padding:12px;border-top:1px solid var(--border);}
+.user-pill{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  background:var(--ink3);border-radius:12px;margin-bottom:8px;cursor:pointer;
+  transition:all .2s;border:1px solid var(--border);
+}
+.user-pill:hover{border-color:rgba(123,111,255,.4);}
+.avatar{
+  width:34px;height:34px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--glow),var(--teal));
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:800;color:#fff;
+}
+.user-name{font-size:13px;font-weight:700;color:var(--text);}
+.user-role{font-size:10px;color:var(--text3);}
+.status-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--ink3);border-radius:10px;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--rose);animation:blink 2s infinite;flex-shrink:0;}
+.status-dot.on{background:var(--emerald);}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+
+/* ── MAIN ────────────────────────────────────────── */
+.main{margin-left:268px;min-height:100vh;position:relative;z-index:1;}
+.topbar{
+  padding:16px 32px;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);
+  background:rgba(4,4,12,.85);backdrop-filter:blur(20px);
+  position:sticky;top:0;z-index:50;
+}
+.topbar-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:800;}
+.topbar-title span{background:linear-gradient(135deg,var(--glow2),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+
+/* ── BUTTONS ──────────────────────────────────────── */
+.btn{padding:9px 18px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;border:none;font-family:'Outfit',sans-serif;letter-spacing:.3px;}
+.btn-primary{background:linear-gradient(135deg,var(--glow),var(--teal));color:#fff;}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(123,111,255,.5);}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text2);}
+.btn-ghost:hover{background:var(--surface2);color:var(--text);border-color:rgba(123,111,255,.4);}
+.btn-teal{background:linear-gradient(135deg,var(--teal2),var(--emerald));color:#fff;}
+.btn-rose{background:linear-gradient(135deg,var(--rose),#FF4466);color:#fff;}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none!important;}
+
+/* ── PAGES ────────────────────────────────────────── */
+.page{display:none;padding:32px;animation:pageIn .35s ease;}
+.page.active{display:block;}
+@keyframes pageIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.page-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;margin-bottom:5px;}
+.page-sub{color:var(--text3);font-size:14px;margin-bottom:28px;letter-spacing:.2px;}
+
+/* ── GRID ─────────────────────────────────────────── */
+.grid{display:grid;gap:20px;}
+.g4{grid-template-columns:repeat(4,1fr);}
+.g3{grid-template-columns:repeat(3,1fr);}
+.g2{grid-template-columns:repeat(2,1fr);}
+
+/* ── CARDS ────────────────────────────────────────── */
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:24px;transition:all .3s;
+  position:relative;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(123,111,255,.3),transparent);
+}
+.card:hover{border-color:rgba(123,111,255,.35);transform:translateY(-2px);box-shadow:0 8px 40px rgba(0,0,0,.4);}
+.card-title{font-family:'Lexend',sans-serif;font-size:15px;font-weight:700;margin-bottom:16px;color:var(--text);}
+
+/* ── METRIC CARDS ─────────────────────────────────── */
+.metric-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:20px;transition:all .3s;position:relative;overflow:hidden;
+}
+.metric-card:hover{transform:translateY(-3px);box-shadow:0 10px 40px rgba(0,0,0,.5);}
+.metric-card::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--glow),var(--teal));
+  transform:scaleX(0);transform-origin:left;transition:transform .4s;
+}
+.metric-card:hover::after{transform:scaleX(1);}
+.metric-icon{font-size:28px;margin-bottom:8px;display:block;}
+.metric-value{font-family:'DM Mono',monospace;font-size:28px;font-weight:500;margin:4px 0;}
+.metric-label{font-size:12px;color:var(--text3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;}
+.mbar{height:3px;border-radius:2px;background:var(--ink3);margin-top:10px;}
+.mbar-fill{height:100%;border-radius:2px;transition:width 1.5s cubic-bezier(.25,.46,.45,.94);}
+
+/* ── READING AREA ─────────────────────────────────── */
+.reading-area{
+  background:var(--ink3);border:1px solid var(--border2);border-radius:var(--r);
+  padding:28px;font-family:var(--ff),sans-serif;line-height:var(--lh);
+  font-size:var(--fs);letter-spacing:.04em;min-height:120px;word-spacing:.1em;
+}
+.word{display:inline;cursor:pointer;border-radius:4px;padding:1px 3px;transition:all .15s;}
+.word:hover,.word.hov{background:rgba(123,111,255,.25);color:var(--glow2);}
+.word.current{background:rgba(0,229,204,.25);color:var(--teal);border-bottom:2px solid var(--teal);}
+
+/* ── CONTROL BUTTONS ──────────────────────────────── */
+.ctrl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.ctrl-btn{
+  display:flex;align-items:center;gap:6px;padding:9px 15px;border-radius:10px;
+  background:var(--ink3);border:1px solid var(--border);color:var(--text2);
+  font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;
+  font-family:'Outfit',sans-serif;letter-spacing:.2px;
+}
+.ctrl-btn:hover{background:var(--glow);border-color:var(--glow);color:#fff;}
+.ctrl-btn.on{background:linear-gradient(135deg,var(--glow),var(--teal));border-color:transparent;color:#fff;}
+.ctrl-btn.on-teal{background:linear-gradient(135deg,var(--teal2),var(--emerald));border-color:transparent;color:#fff;}
+
+/* ── SLIDERS ──────────────────────────────────────── */
+.sl-wrap{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.sl-label{font-size:12px;color:var(--text3);font-weight:600;min-width:120px;letter-spacing:.3px;}
+.sl-val{font-family:'DM Mono',monospace;font-size:12px;color:var(--glow2);min-width:44px;text-align:right;}
+input[type=range]{flex:1;height:4px;border-radius:2px;background:var(--ink3);outline:none;-webkit-appearance:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:linear-gradient(135deg,var(--glow),var(--teal));border-radius:50%;transition:transform .2s;box-shadow:0 0 8px rgba(123,111,255,.5);}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.3);}
+
+/* ── INPUTS ───────────────────────────────────────── */
+textarea,.text-input{
+  width:100%;background:var(--ink3);border:1.5px solid var(--border);
+  border-radius:12px;padding:14px;color:var(--text);
+  font-family:'Outfit',sans-serif;font-size:14px;line-height:1.8;
+  resize:vertical;outline:none;transition:all .25s;
+}
+textarea:focus,.text-input:focus{border-color:var(--glow);box-shadow:0 0 20px rgba(123,111,255,.15);}
+textarea::placeholder,.text-input::placeholder{color:var(--text4);}
+.t-input{
+  background:var(--ink3);border:1.5px solid var(--border);border-radius:12px;
+  padding:11px 14px;color:var(--text);font-family:'Outfit',sans-serif;
+  font-size:14px;outline:none;transition:all .25s;
+}
+.t-input:focus{border-color:var(--glow);box-shadow:0 0 20px rgba(123,111,255,.15);}
+select{
+  background:var(--ink3);border:1.5px solid var(--border);color:var(--text);
+  padding:9px 14px;border-radius:10px;font-family:'Outfit',sans-serif;
+  font-size:13px;outline:none;cursor:pointer;transition:border-color .2s;
+}
+select:focus{border-color:var(--glow);}
+input[type=file]{display:none;}
+
+/* ── UPLOAD ZONE ──────────────────────────────────── */
+.upload-zone{
+  border:2px dashed var(--border);border-radius:var(--r);
+  padding:44px 24px;text-align:center;cursor:pointer;
+  transition:all .3s;background:var(--ink3);position:relative;overflow:hidden;
+}
+.upload-zone:hover,.upload-zone.over{
+  border-color:var(--glow2);background:rgba(123,111,255,.06);
+}
+
+/* ── PROGRESS BARS ────────────────────────────────── */
+.prog-header{display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;font-weight:600;}
+.prog-bar{height:8px;border-radius:4px;background:var(--ink3);margin-bottom:16px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:4px;transition:width 1.5s cubic-bezier(.25,.46,.45,.94);}
+
+/* ── TABS ─────────────────────────────────────────── */
+.tabs{display:flex;gap:4px;background:var(--ink3);padding:4px;border-radius:12px;margin-bottom:22px;}
+.tab{flex:1;padding:9px;border-radius:9px;text-align:center;font-size:12px;font-weight:700;cursor:pointer;color:var(--text3);transition:all .2s;font-family:'Outfit',sans-serif;letter-spacing:.3px;}
+.tab.active{background:var(--surface2);color:var(--text);box-shadow:0 2px 12px rgba(0,0,0,.4);}
+
+/* ── BAR CHART ────────────────────────────────────── */
+.bar-chart{display:flex;align-items:flex-end;gap:12px;height:130px;padding:0 4px;}
+.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.bar{width:100%;border-radius:6px 6px 0 0;min-height:4px;cursor:pointer;transition:all .4s cubic-bezier(.25,.46,.45,.94);}
+.bar:hover{opacity:.75;transform:scaleY(1.06);transform-origin:bottom;}
+.bar-label{font-size:10px;color:var(--text4);font-weight:600;text-align:center;}
+
+/* ── WORD PANEL ───────────────────────────────────── */
+.word-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;}
+.word-big{font-family:'Playfair Display',serif;font-size:30px;font-weight:900;color:var(--glow2);}
+.word-phon{font-family:'DM Mono',monospace;font-size:12px;color:var(--text3);margin:4px 0 10px;}
+
+/* ── CHIPS ────────────────────────────────────────── */
+.chip{display:inline-block;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:.5px;}
+.chip-v{background:rgba(123,111,255,.15);color:var(--glow2);border:1px solid rgba(123,111,255,.3);}
+.chip-t{background:rgba(0,229,204,.12);color:var(--teal);border:1px solid rgba(0,229,204,.3);}
+.chip-g{background:rgba(0,214,143,.12);color:var(--emerald);border:1px solid rgba(0,214,143,.3);}
+.chip-r{background:rgba(255,107,138,.12);color:var(--rose);border:1px solid rgba(255,107,138,.3);}
+.chip-a{background:rgba(255,179,71,.12);color:var(--amber);border:1px solid rgba(255,179,71,.3);}
+
+/* ── SPINNER ──────────────────────────────────────── */
+.spinner{width:20px;height:20px;border:2px solid transparent;border-top-color:var(--glow2);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── NOTIFICATIONS ────────────────────────────────── */
+#notifArea{position:fixed;bottom:28px;right:28px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none;}
+.notif{
+  background:var(--surface2);border:1px solid var(--border);border-radius:14px;
+  padding:14px 20px;box-shadow:var(--shadow);display:flex;align-items:center;
+  gap:12px;max-width:320px;animation:notifIn .35s cubic-bezier(.34,1.56,.64,1);
+  pointer-events:all;position:relative;overflow:hidden;
+}
+.notif::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--glow),var(--teal));}
+@keyframes notifIn{from{transform:translateX(120%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+.notif-out{animation:notifOut .3s ease forwards;}
+@keyframes notifOut{to{transform:translateX(120%);opacity:0;}}
+.notif-icon{font-size:20px;flex-shrink:0;}
+.notif-text{font-size:13px;font-weight:700;color:var(--text);}
+
+/* ── VISUALIZER ───────────────────────────────────── */
+.viz{display:flex;align-items:center;justify-content:center;gap:4px;height:40px;}
+.vbar{width:5px;border-radius:3px;background:linear-gradient(to top,var(--glow),var(--teal));animation:va .8s ease-in-out infinite;}
+@keyframes va{0%,100%{height:5px;}50%{height:32px;}}
+.vbar:nth-child(2){animation-delay:.1s;}.vbar:nth-child(3){animation-delay:.2s;}
+.vbar:nth-child(4){animation-delay:.3s;}.vbar:nth-child(5){animation-delay:.25s;}
+.vbar:nth-child(6){animation-delay:.15s;}.vbar:nth-child(7){animation-delay:.05s;}
+.viz.paused .vbar{animation-play-state:paused;height:5px;}
+
+/* ── SEARCH BAR ───────────────────────────────────── */
+.search-wrap{position:relative;margin-bottom:22px;}
+.search-field{
+  width:100%;background:var(--surface);border:1.5px solid var(--border);
+  border-radius:50px;padding:16px 28px 16px 58px;color:var(--text);
+  font-family:'Outfit',sans-serif;font-size:16px;outline:none;
+  transition:all .3s;box-shadow:0 4px 30px rgba(0,0,0,.3);
+}
+.search-field:focus{border-color:var(--glow);box-shadow:0 4px 40px rgba(123,111,255,.25);}
+.search-field::placeholder{color:var(--text4);}
+.search-ico{position:absolute;left:20px;top:50%;transform:translateY(-50%);font-size:22px;pointer-events:none;}
+.search-go{position:absolute;right:12px;top:50%;transform:translateY(-50%);}
+.s-result{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:18px;margin-bottom:12px;cursor:pointer;transition:all .25s;
+  display:flex;align-items:flex-start;gap:16px;
+}
+.s-result:hover{border-color:rgba(123,111,255,.4);transform:translateX(5px);background:var(--surface2);}
+.s-result-icon{font-size:32px;flex-shrink:0;margin-top:2px;}
+.s-result-title{font-family:'Lexend',sans-serif;font-size:16px;font-weight:700;color:var(--glow2);margin-bottom:5px;}
+.s-result-snippet{font-size:13px;color:var(--text2);line-height:1.7;}
+
+/* ── DYSLEXIA CHALLENGE ───────────────────────────── */
+.challenge-card{
+  background:var(--surface);border:2px solid var(--border);
+  border-radius:24px;padding:36px;text-align:center;
+}
+.ch-word{
+  font-family:'DM Mono',monospace;font-size:56px;font-weight:500;
+  letter-spacing:10px;margin:24px 0;color:var(--glow2);
+  text-shadow:0 0 30px rgba(123,111,255,.5);
+}
+.ch-opts{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:20px 0;}
+.ch-opt{
+  padding:16px 32px;border-radius:14px;font-size:32px;font-weight:800;
+  cursor:pointer;border:2px solid var(--border);background:var(--ink3);
+  color:var(--text);transition:all .2s;font-family:'DM Mono',monospace;
+}
+.ch-opt:hover{border-color:var(--glow2);background:rgba(123,111,255,.1);transform:translateY(-3px);}
+.ch-opt.correct{border-color:var(--emerald);background:rgba(0,214,143,.1);color:var(--emerald);}
+.ch-opt.wrong{border-color:var(--rose);background:rgba(255,107,138,.1);color:var(--rose);}
+.risk-box{padding:18px;border-radius:14px;text-align:center;font-family:'Lexend',sans-serif;font-weight:700;font-size:17px;margin-top:18px;}
+.risk-low{background:rgba(0,214,143,.08);border:1px solid rgba(0,214,143,.25);color:var(--emerald);}
+.risk-mod{background:rgba(255,179,71,.08);border:1px solid rgba(255,179,71,.25);color:var(--amber);}
+.risk-high{background:rgba(255,107,138,.08);border:1px solid rgba(255,107,138,.25);color:var(--rose);}
+.err-meter{height:10px;border-radius:5px;background:var(--ink3);margin:12px 0;overflow:hidden;}
+.err-fill{height:100%;border-radius:5px;transition:width .5s ease;background:linear-gradient(90deg,var(--emerald),var(--amber),var(--rose));}
+
+/* ── TRANSLATOR ───────────────────────────────────── */
+.trans-panel{background:var(--ink3);border:1px solid var(--border);border-radius:14px;padding:20px;flex:1;}
+.lang-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.swap-btn{
+  padding:9px;border-radius:50%;background:var(--ink3);border:1px solid var(--border);
+  color:var(--text);cursor:pointer;transition:all .25s;font-size:18px;line-height:1;
+  flex-shrink:0;
+}
+.swap-btn:hover{background:var(--glow);border-color:var(--glow);transform:rotate(180deg);}
+.trans-out{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:12px;padding:16px;min-height:90px;
+  font-size:15px;line-height:1.8;color:var(--text);
+}
+
+/* ── OCR ──────────────────────────────────────────── */
+.ocr-tab-row{display:flex;gap:0;margin-bottom:0;}
+.ocr-tab{
+  flex:1;padding:11px;text-align:center;font-size:12px;font-weight:700;
+  cursor:pointer;border:1px solid var(--border);background:var(--ink3);
+  color:var(--text2);transition:all .2s;font-family:'Outfit',sans-serif;
+}
+.ocr-tab:first-child{border-radius:10px 0 0 0;}
+.ocr-tab:last-child{border-radius:0 10px 0 0;}
+.ocr-tab.active{background:var(--glow);border-color:var(--glow);color:#fff;}
+.ocr-box{
+  background:var(--ink3);border:1px solid var(--border);
+  border-radius:0 0 12px 12px;padding:18px;font-size:15px;
+  line-height:1.9;min-height:120px;color:var(--text);font-family:'Outfit',sans-serif;
+}
+
+/* ── SPEECH MIC ───────────────────────────────────── */
+.mic-btn{
+  width:84px;height:84px;border-radius:50%;
+  background:linear-gradient(135deg,var(--glow),var(--teal));
+  border:none;font-size:34px;cursor:pointer;transition:all .3s;
+  margin:22px auto;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 30px rgba(123,111,255,.4);
+}
+.mic-btn:hover{transform:scale(1.08);box-shadow:0 8px 40px rgba(123,111,255,.6);}
+.mic-btn.rec{background:linear-gradient(135deg,var(--rose),#FF4466);animation:micPulse 1s ease-in-out infinite;}
+@keyframes micPulse{0%,100%{box-shadow:0 6px 30px rgba(255,107,138,.3);}50%{box-shadow:0 6px 50px rgba(255,107,138,.7);}}
+.transcript{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:16px;min-height:64px;
+  text-align:left;font-size:14px;line-height:1.8;color:var(--text);margin-top:16px;
+}
+
+/* ── WORD TILES ───────────────────────────────────── */
+.tile-zone{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;min-height:54px;padding:14px;background:var(--ink3);border-radius:12px;border:1px solid var(--border);}
+.tile{padding:9px 18px;background:var(--surface);border:1px solid var(--border);border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;user-select:none;}
+.tile:hover{border-color:var(--glow2);background:rgba(123,111,255,.1);}
+.tile.placed{border-color:var(--teal);background:rgba(0,229,204,.1);color:var(--teal);}
+
+/* ── TIMELINE ─────────────────────────────────────── */
+.timeline{position:relative;padding-left:28px;}
+.timeline::before{content:'';position:absolute;left:10px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--glow),var(--teal));opacity:.3;}
+.tl-item{position:relative;margin-bottom:20px;}
+.tl-dot{position:absolute;left:-22px;top:3px;width:13px;height:13px;border-radius:50%;border:2px solid var(--glow);background:var(--ink);}
+.tl-dot.done{background:linear-gradient(135deg,var(--glow),var(--teal));border-color:transparent;}
+.tl-title{font-size:14px;font-weight:700;margin-bottom:3px;color:var(--text);}
+.tl-sub{font-size:12px;color:var(--text3);line-height:1.6;}
+
+/* ── COLOR OVERLAY ────────────────────────────────── */
+#colorOverlay{position:fixed;inset:0;pointer-events:none;z-index:2;transition:background .4s;}
+
+/* ── PARTICLES ────────────────────────────────────── */
+.particles{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
+.particle{position:absolute;border-radius:50%;opacity:0;animation:floatUp linear infinite;}
+@keyframes floatUp{0%{transform:translateY(100vh) scale(0);opacity:0;}10%{opacity:.6;}90%{opacity:.1;}100%{transform:translateY(-10vh) scale(1.2);opacity:0;}}
+
+/* ── SCORE RING ───────────────────────────────────── */
+.score-ring{width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:18px;font-weight:500;}
+
+/* ── RESPONSIVE ───────────────────────────────────── */
+@media(max-width:1100px){.g4{grid-template-columns:repeat(2,1fr);}.g3{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:768px){.sidebar{transform:translateX(-268px);}.main{margin-left:0;}.g4,.g3,.g2{grid-template-columns:1fr;}.page{padding:18px;}}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--ink);}::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:3px;}::-webkit-scrollbar-thumb:hover{background:var(--glow);}
+</style>
+</head>
+<body>
+
+<!-- Orbs & Particles -->
+<div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
+<div class="particles" id="particles"></div>
+<div id="colorOverlay"></div>
+<div id="notifArea"></div>
+
+<!-- ════════════════════ AUTH SCREEN ════════════════════ -->
+<div id="authScreen">
+  <div class="auth-wrap" style="position:relative;z-index:1;">
+    <div class="auth-brand">
+      <div class="auth-logo-box">📖</div>
+      <div class="auth-title">LexiSense AI</div>
+      <div class="auth-sub">INTELLIGENT DYSLEXIA READING ASSISTANT · JISTECH2K26</div>
+    </div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <div class="auth-tab active" onclick="switchAuthTab('login',this)">Sign In</div>
+        <div class="auth-tab" onclick="switchAuthTab('signup',this)">Create Account</div>
+      </div>
+      <div id="loginForm" class="auth-form">
+        <div class="field-wrap"><span class="field-icon">👤</span><input class="field" id="lgUser" type="text" placeholder="Username"/></div>
+        <div class="field-wrap"><span class="field-icon">🔒</span><input class="field" id="lgPass" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+        <button class="auth-btn" onclick="doLogin()">Sign In →</button>
+        <div class="auth-err" id="lgErr"></div>
+      </div>
+      <div id="signupForm" class="auth-form" style="display:none;">
+        <div class="field-wrap"><span class="field-icon">✨</span><input class="field" id="sgName" type="text" placeholder="Full Name"/></div>
+        <div class="field-wrap"><span class="field-icon">👤</span><input class="field" id="sgUser" type="text" placeholder="Username"/></div>
+        <div class="field-wrap"><span class="field-icon">📧</span><input class="field" id="sgEmail" type="text" placeholder="Email Address"/></div>
+        <div class="field-wrap"><span class="field-icon">🔒</span><input class="field" id="sgPass" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')doSignup()"/></div>
+        <button class="auth-btn" onclick="doSignup()">Create Account →</button>
+        <div class="auth-err" id="sgErr"></div>
+      </div>
+    </div>
+    <div class="auth-skip"><a onclick="skipAuth()">Continue as Guest (progress won't be saved)</a></div>
+  </div>
+</div>
+
+<!-- ════════════════════ SIDEBAR ════════════════════ -->
+<nav class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">📖</div>
+    <div><div class="sb-logo-name">LexiSense AI</div><div class="sb-logo-sub">JISTECH2K26 · JIS COLLEGE</div></div>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-section">
+      <div class="sb-label">Main</div>
+      <div class="sb-item active" onclick="nav('dashboard',this)"><span class="sb-icon">🏠</span>Dashboard</div>
+      <div class="sb-item" onclick="nav('reader',this)"><span class="sb-icon">📚</span>Smart Reader<span class="sb-badge ai">AI</span></div>
+      <div class="sb-item" onclick="nav('ocr',this)"><span class="sb-icon">📷</span>OCR Scanner</div>
+      <div class="sb-item" onclick="nav('speech',this)"><span class="sb-icon">🔊</span>Text to Speech</div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Tools</div>
+      <div class="sb-item" onclick="nav('translate',this)"><span class="sb-icon">🌐</span>Translator<span class="sb-badge new">NEW</span></div>
+      <div class="sb-item" onclick="nav('search',this)"><span class="sb-icon">🔍</span>Smart Search</div>
+      <div class="sb-item" onclick="nav('dyslexia',this)"><span class="sb-icon">🧠</span>Dyslexia Check<span class="sb-badge hot">AI</span></div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Learning</div>
+      <div class="sb-item" onclick="nav('settings',this)"><span class="sb-icon">⚙️</span>Reading Settings</div>
+      <div class="sb-item" onclick="nav('progress',this)"><span class="sb-icon">📊</span>Progress & Analytics</div>
+      <div class="sb-item" onclick="nav('words',this)"><span class="sb-icon">💡</span>Dictionary</div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Info</div>
+      <div class="sb-item" onclick="nav('about',this)"><span class="sb-icon">ℹ️</span>About Project</div>
+    </div>
+  </div>
+  <div class="sb-footer">
+    <div class="user-pill" id="userPill" style="display:none;">
+      <div class="avatar" id="uAvatar">?</div>
+      <div><div class="user-name" id="uName">Guest</div><div class="user-role">Reader</div></div>
+      <button class="btn btn-ghost" style="margin-left:auto;font-size:11px;padding:5px 10px;" onclick="doLogout()">Out</button>
+    </div>
+    <div class="status-row">
+      <div class="status-dot" id="sDot"></div>
+      <div>
+        <div style="font-size:11px;font-weight:700;" id="sTxt">Connecting…</div>
+        <div style="font-size:10px;color:var(--text4);">localhost:5000</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════════════════ MAIN ════════════════════ -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title"><span>LexiSense AI</span> — JISTech2K26</div>
+    <div class="topbar-right">
+      <span id="hStatus" style="font-size:12px;color:var(--text3);">Connecting…</span>
+      <button class="btn btn-ghost" onclick="checkServer()">↺ Refresh</button>
+      <button class="btn btn-primary" onclick="nav('reader',null)">📚 Start Reading</button>
+    </div>
+  </div>
+
+  <!-- ═══════ DASHBOARD ═══════ -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-title">Dashboard 🏠</div>
+    <div class="page-sub">LexiSense AI · JIS College of Engineering · Information Technology</div>
+    <div class="grid g4" style="margin-bottom:22px;">
+      <div class="metric-card"><span class="metric-icon">📖</span><div class="metric-label">Words Read</div><div class="metric-value" id="m-words">—</div><div class="mbar"><div class="mbar-fill" id="mb1" style="width:0;background:linear-gradient(90deg,var(--glow),var(--glow2));"></div></div></div>
+      <div class="metric-card"><span class="metric-icon">📚</span><div class="metric-label">Vocabulary</div><div class="metric-value" id="m-vocab">—</div><div class="mbar"><div class="mbar-fill" id="mb2" style="width:0;background:linear-gradient(90deg,var(--teal),var(--emerald));"></div></div></div>
+      <div class="metric-card"><span class="metric-icon">🎯</span><div class="metric-label">Avg Score</div><div class="metric-value" id="m-score">—</div><div class="mbar"><div class="mbar-fill" id="mb3" style="width:0;background:linear-gradient(90deg,var(--amber),var(--rose));"></div></div></div>
+      <div class="metric-card"><span class="metric-icon">🔥</span><div class="metric-label">Streak</div><div class="metric-value" id="m-streak">—</div><div class="mbar"><div class="mbar-fill" id="mb4" style="width:0;background:linear-gradient(90deg,var(--rose),var(--amber));"></div></div></div>
+    </div>
+    <div class="grid g3" style="margin-bottom:22px;">
+      <div class="card" style="grid-column:span 2;">
+        <div class="card-title">📊 Reading Activity — Last 7 Days</div>
+        <div class="bar-chart" id="dashChart"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🧠 Dyslexia Risk</div>
+        <div id="dashRisk" style="text-align:center;padding:16px;">
+          <div style="font-size:48px;margin-bottom:10px;">🔍</div>
+          <div style="font-size:13px;color:var(--text3);">Loading assessment…</div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;font-size:12px;" onclick="nav('dyslexia',null)">Take Full Test</button>
+      </div>
+    </div>
+    <div class="grid g3">
+      <div class="card" onclick="nav('reader',null)" style="cursor:pointer;">
+        <div style="font-size:36px;margin-bottom:12px;">📚</div>
+        <div style="font-family:'Lexend',sans-serif;font-weight:700;font-size:15px;margin-bottom:6px;">Smart Reader</div>
+        <div style="font-size:12px;color:var(--text3);">AI text simplification + dyslexia-friendly display + Bengali support</div>
+      </div>
+      <div class="card" onclick="nav('ocr',null)" style="cursor:pointer;">
+        <div style="font-size:36px;margin-bottom:12px;">📷</div>
+        <div style="font-family:'Lexend',sans-serif;font-weight:700;font-size:15px;margin-bottom:6px;">OCR Scanner</div>
+        <div style="font-size:12px;color:var(--text3);">Extract Bengali + English text from images</div>
+      </div>
+      <div class="card" onclick="nav('translate',null)" style="cursor:pointer;">
+        <div style="font-size:36px;margin-bottom:12px;">🌐</div>
+        <div style="font-family:'Lexend',sans-serif;font-weight:700;font-size:15px;margin-bottom:6px;">Translator</div>
+        <div style="font-size:12px;color:var(--text3);">20+ languages including Bengali, Hindi, Tamil and more</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ SMART READER ═══════ -->
+  <div class="page" id="page-reader">
+    <div class="page-title">📚 Smart Reader</div>
+    <div class="page-sub">AI text simplification · Click any word for definition · Bengali support</div>
+    <div class="grid g2" style="margin-bottom:18px;">
+      <div>
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-title">Input Text</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <label style="font-size:12px;color:var(--text3);font-weight:600;">Language:</label>
+            <select id="rLang" onchange="onLangChange()">
+              <option value="en">🇬🇧 English</option>
+              <option value="bn">🇧🇩 Bengali (বাংলা)</option>
+            </select>
+          </div>
+          <textarea id="inputText" rows="7" placeholder="Paste English or Bengali text here…">The quick brown fox demonstrates remarkable agility by jumping over the lazy dog. This comprehensive exercise utilizes all letters of the alphabet and is frequently employed in typography testing scenarios to facilitate visual evaluation.</textarea>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+            <button class="btn btn-primary" onclick="simplifyText()">✨ AI Simplify</button>
+            <button class="btn btn-ghost" onclick="clearText()">🗑 Clear</button>
+            <button class="ctrl-btn" onclick="loadSample()">📄 English Sample</button>
+            <button class="ctrl-btn" onclick="loadBengaliSample()">📄 Bengali Sample</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">📊 Readability Score</div>
+          <div style="display:flex;align-items:center;gap:18px;">
+            <div class="score-ring" id="scoreRing" style="background:conic-gradient(var(--glow) 0deg,var(--ink3) 0deg);border:3px solid var(--ink3);">—</div>
+            <div>
+              <div style="font-family:'Lexend',sans-serif;font-weight:700;font-size:16px;" id="scoreGrade">—</div>
+              <div style="font-size:12px;color:var(--text3);margin-top:4px;" id="scoreWords">Enter text to analyse</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <div class="card-title" style="margin-bottom:0;">✨ AI Simplified Text</div>
+            <div style="display:flex;gap:6px;">
+              <button class="ctrl-btn" id="speakEn" onclick="speakText('en-IN')">🔊 Listen EN</button>
+              <button class="ctrl-btn" id="speakBn" onclick="speakText('bn-BD')" style="display:none;">🗣 বাংলা</button>
+              <button class="ctrl-btn" id="readerStopBtn" onclick="stopReaderSpeech()" style="display:none;background:var(--red,#e05555);color:#fff;border-color:var(--red,#e05555);">⏹ Stop</button>
+            </div>
+          </div>
+          <div class="reading-area" id="outputText" style="min-height:170px;">
+            <span style="color:var(--text4);">Simplified text will appear here after clicking "AI Simplify"…</span>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+            <span class="chip chip-v" id="wordsSimp">— simplified</span>
+            <span class="chip chip-t" id="sentCount">— sentences</span>
+          </div>
+        </div>
+        <div class="word-panel" id="wordPanel">
+          <div style="text-align:center;color:var(--text4);font-size:13px;padding:10px;">👆 Click any word in the simplified text to look it up</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🎛 Reading Controls</div>
+      <div class="ctrl">
+        <button class="ctrl-btn" id="fsBtn" onclick="cycleFontSize()">🔠 Font: 18px</button>
+        <button class="ctrl-btn" id="lsBtn" onclick="cycleSpacing()">↕ Spacing: 2.2</button>
+        <button class="ctrl-btn" id="ovBtn" onclick="cycleOverlay()">🎨 No Overlay</button>
+        <button class="ctrl-btn" id="focBtn" onclick="toggleFocus()">👁 Focus: Off</button>
+        <button class="ctrl-btn" id="rulBtn" onclick="toggleRuler()">📏 Ruler: Off</button>
+        <button class="ctrl-btn" onclick="exportPDF()">📄 Export PDF</button>
+        <button class="ctrl-btn" onclick="exportMP3()">🎵 Export MP3</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ OCR SCANNER ═══════ -->
+  <div class="page" id="page-ocr">
+    <div class="page-title">📷 OCR Scanner</div>
+    <div class="page-sub">Extract text from images · Bengali + English · Actual & AI Simplified side-by-side</div>
+    <div class="grid g2">
+      <div>
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-title">Upload Image</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+            <label style="font-size:12px;color:var(--text3);font-weight:600;">OCR Language:</label>
+            <select id="ocrLang">
+              <option value="en">🇬🇧 English</option>
+              <option value="bn">🇧🇩 Bengali (বাংলা)</option>
+              <option value="both">🌐 Bengali + English</option>
+            </select>
+          </div>
+          <div class="upload-zone" id="ocrZone" onclick="document.getElementById('ocrFile').click()"
+            ondragover="event.preventDefault();this.classList.add('over')"
+            ondragleave="this.classList.remove('over')" ondrop="ocrDrop(event)">
+            <div style="font-size:48px;margin-bottom:12px;">📷</div>
+            <div style="font-weight:700;font-size:15px;margin-bottom:6px;">Drop image here or click to upload</div>
+            <div style="font-size:12px;color:var(--text4);">PNG · JPG · JPEG · TIFF · Bengali & English</div>
+          </div>
+          <input type="file" id="ocrFile" accept="image/*" onchange="ocrFileChange(event)"/>
+          <div id="ocrPreview" style="margin-top:14px;display:none;">
+            <img id="ocrImg" style="max-width:100%;border-radius:12px;border:1px solid var(--border);"/>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+            <button class="btn btn-primary" id="ocrBtn" onclick="runOCR()" disabled>🔍 Extract Text</button>
+            <button class="btn btn-ghost" onclick="ocrDemo()">📋 Demo Text</button>
+            <button class="btn btn-ghost" id="ocrClearBtn" onclick="clearOCR()" style="display:none;">🗑 Clear</button>
+          </div>
+          <div id="ocrStatus" style="margin-top:10px;font-size:12px;color:var(--text3);"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Extracted Results</div>
+        <div class="ocr-tab-row">
+          <div class="ocr-tab active" onclick="switchOCRTab('actual',this)">📄 Actual Text</div>
+          <div class="ocr-tab" onclick="switchOCRTab('simplified',this)">✨ AI Simplified</div>
+        </div>
+        <div class="ocr-box" id="ocrActual">Extracted text will appear here…</div>
+        <div class="ocr-box" id="ocrSimp" style="display:none;">AI simplified version will appear here…</div>
+        <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="ctrl-btn" onclick="speakOCR('en-IN')">🔊 English</button>
+          <button class="ctrl-btn" onclick="speakOCR('bn-BD')">🗣 বাংলা</button>
+          <button class="ctrl-btn" onclick="copyOCR()">📋 Copy</button>
+          <button class="ctrl-btn" onclick="ocrToReader()">→ Reader</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ TEXT TO SPEECH ═══════ -->
+  <div class="page" id="page-speech">
+    <div class="page-title">🔊 Text to Speech</div>
+    <div class="page-sub">Live word highlighting · Bengali voice · Multiple speeds & pitches</div>
+    <div class="grid g2">
+      <div>
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-title">Text & Voice</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+            <select id="ttsLang" style="flex:1;" onchange="updateVoices()">
+              <option value="en-IN">🇮🇳 English (India)</option>
+              <option value="en-US">🇺🇸 English (US)</option>
+              <option value="en-GB">🇬🇧 English (UK)</option>
+              <option value="bn-BD">🇧🇩 Bengali (Bangladesh)</option>
+              <option value="bn-IN">🇮🇳 Bengali (India)</option>
+              <option value="hi-IN">🇮🇳 Hindi</option>
+              <option value="fr-FR">🇫🇷 French</option>
+              <option value="de-DE">🇩🇪 German</option>
+              <option value="es-ES">🇪🇸 Spanish</option>
+              <option value="ja-JP">🇯🇵 Japanese</option>
+              <option value="zh-CN">🇨🇳 Chinese</option>
+              <option value="ar-SA">🇸🇦 Arabic</option>
+            </select>
+            <select id="voiceSel" style="flex:1;"></select>
+          </div>
+          <textarea id="ttsText" rows="6" placeholder="Enter text… (English or বাংলা)">The sun rises every morning and sets every evening. Reading every day makes you smarter and more creative. LexiSense AI helps everyone read better.</textarea>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+            <button class="ctrl-btn" onclick="ttsBengaliSample()">📝 Bengali Sample</button>
+            <button class="ctrl-btn" onclick="document.getElementById('ttsText').value=''">🗑 Clear</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Playback Controls</div>
+          <div class="sl-wrap"><span class="sl-label">Speed</span><input type="range" id="ttsRate" min=".5" max="2" step=".1" value=".9" oninput="document.getElementById('ttsRateV').textContent=this.value+'×'"/><span class="sl-val" id="ttsRateV">.9×</span></div>
+          <div class="sl-wrap"><span class="sl-label">Pitch</span><input type="range" id="ttsPitch" min=".5" max="2" step=".1" value="1" oninput="document.getElementById('ttsPitchV').textContent=this.value"/><span class="sl-val" id="ttsPitchV">1</span></div>
+          <div class="sl-wrap"><span class="sl-label">Volume</span><input type="range" id="ttsVol" min="0" max="1" step=".1" value="1" oninput="document.getElementById('ttsVolV').textContent=Math.round(this.value*100)+'%'"/><span class="sl-val" id="ttsVolV">100%</span></div>
+          <div class="ctrl" style="margin-top:14px;">
+            <button class="ctrl-btn on" id="playBtn" onclick="toggleTTS()">▶ Play</button>
+            <button class="ctrl-btn" onclick="stopTTS()">⏹ Stop</button>
+            <button class="ctrl-btn" onclick="downloadMP3()">⬇ MP3</button>
+          </div>
+          <div class="viz paused" id="viz" style="margin-top:16px;">
+            <div class="vbar"></div><div class="vbar"></div><div class="vbar"></div>
+            <div class="vbar"></div><div class="vbar"></div><div class="vbar"></div><div class="vbar"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🔴 Live Reading Display</div>
+        <div class="reading-area" id="ttsDisplay" style="min-height:220px;"></div>
+        <div style="margin-top:16px;">
+          <div style="font-size:12px;color:var(--text3);margin-bottom:6px;">Progress</div>
+          <div class="prog-bar"><div class="prog-fill" id="ttsProg" style="width:0;background:linear-gradient(90deg,var(--glow),var(--teal));"></div></div>
+          <div id="ttsWordCount" style="font-size:12px;color:var(--text2);text-align:right;margin-top:4px;">Word 0 of 0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ TRANSLATOR ═══════ -->
+  <div class="page" id="page-translate">
+    <div class="page-title">🌐 Universal Translator</div>
+    <div class="page-sub">20+ languages · Bengali support · Live translation as you type</div>
+    <div class="card" style="margin-bottom:18px;">
+      <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;">
+        <div class="trans-panel" style="flex:1;min-width:260px;">
+          <div class="lang-row">
+            <select id="srcLang" style="flex:1;">
+              <option value="auto">🔍 Auto Detect</option>
+              <option value="en">🇬🇧 English</option><option value="bn">🇧🇩 Bengali</option>
+              <option value="hi">🇮🇳 Hindi</option><option value="fr">🇫🇷 French</option>
+              <option value="de">🇩🇪 German</option><option value="es">🇪🇸 Spanish</option>
+              <option value="ar">🇸🇦 Arabic</option><option value="zh-cn">🇨🇳 Chinese</option>
+              <option value="ja">🇯🇵 Japanese</option><option value="ko">🇰🇷 Korean</option>
+              <option value="ru">🇷🇺 Russian</option><option value="pt">🇵🇹 Portuguese</option>
+              <option value="it">🇮🇹 Italian</option><option value="ur">🇵🇰 Urdu</option>
+              <option value="ta">Tamil</option><option value="te">Telugu</option>
+              <option value="ml">Malayalam</option><option value="gu">Gujarati</option>
+              <option value="pa">Punjabi</option><option value="mr">Marathi</option>
+            </select>
+            <span style="font-size:12px;color:var(--text4);">Source</span>
+          </div>
+          <textarea id="transIn" rows="5" placeholder="Enter any text…" oninput="onTransInput()">Hello, how are you today?</textarea>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button class="btn btn-primary" onclick="doTranslate()">🌐 Translate</button>
+            <button class="ctrl-btn" onclick="speakEl('transIn',document.getElementById('srcLang').value)">🔊</button>
+            <button class="ctrl-btn" onclick="document.getElementById('transIn').value='';document.getElementById('transOut').textContent='Translation…'">🗑</button>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;">
+          <button class="swap-btn" onclick="swapLangs()">⇄</button>
+        </div>
+        <div class="trans-panel" style="flex:1;min-width:260px;">
+          <div class="lang-row">
+            <select id="tgtLang" style="flex:1;">
+              <option value="bn">🇧🇩 Bengali</option><option value="en">🇬🇧 English</option>
+              <option value="hi">🇮🇳 Hindi</option><option value="fr">🇫🇷 French</option>
+              <option value="de">🇩🇪 German</option><option value="es">🇪🇸 Spanish</option>
+              <option value="ar">🇸🇦 Arabic</option><option value="zh-cn">🇨🇳 Chinese</option>
+              <option value="ja">🇯🇵 Japanese</option><option value="ko">🇰🇷 Korean</option>
+              <option value="ru">🇷🇺 Russian</option><option value="pt">🇵🇹 Portuguese</option>
+              <option value="it">🇮🇹 Italian</option><option value="ur">🇵🇰 Urdu</option>
+              <option value="ta">Tamil</option><option value="te">Telugu</option>
+            </select>
+            <span style="font-size:12px;color:var(--text4);">Target</span>
+          </div>
+          <div class="trans-out" id="transOut">Translation will appear here…</div>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button class="ctrl-btn" onclick="speakEl('transOut',document.getElementById('tgtLang').value)">🔊 Listen</button>
+            <button class="ctrl-btn" onclick="navigator.clipboard.writeText(document.getElementById('transOut').textContent).then(()=>notif('📋','Copied!'))">📋 Copy</button>
+            <button class="ctrl-btn" onclick="document.getElementById('inputText').value=document.getElementById('transOut').textContent;nav('reader',null)">→ Reader</button>
+          </div>
+        </div>
+      </div>
+      <div id="transInfo" style="margin-top:12px;font-size:12px;color:var(--text4);"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚡ Quick Phrases</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="ctrl-btn" onclick="quickTrans('Hello, how are you?')">Hello</button>
+        <button class="ctrl-btn" onclick="quickTrans('Thank you very much')">Thank You</button>
+        <button class="ctrl-btn" onclick="quickTrans('I need help with reading')">Need help</button>
+        <button class="ctrl-btn" onclick="quickTrans('Dyslexia is a reading difference not a disability')">About Dyslexia</button>
+        <button class="ctrl-btn" onclick="quickTrans('I love learning new languages every day')">Love learning</button>
+        <button class="ctrl-btn" onclick="quickTrans('The sky is blue and the sun is bright')">Simple sentence</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ SMART SEARCH ═══════ -->
+  <div class="page" id="page-search">
+    <div class="page-title">🔍 Smart Search</div>
+    <div class="page-sub">Search the LexiSense knowledge base — dyslexia, reading, Bengali, OCR and more</div>
+    <div class="search-wrap">
+      <span class="search-ico">🔍</span>
+      <input class="search-field" id="searchIn" placeholder="Search… dyslexia, reading tips, Bengali, phonics, OCR, color overlay, font…" onkeydown="if(event.key==='Enter')doSearch()"/>
+      <button class="btn btn-primary search-go" onclick="doSearch()">Search</button>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;">
+      <button class="ctrl-btn" onclick="qs('dyslexia')">dyslexia</button>
+      <button class="ctrl-btn" onclick="qs('reading tips')">reading tips</button>
+      <button class="ctrl-btn" onclick="qs('bengali')">bengali</button>
+      <button class="ctrl-btn" onclick="qs('phonics')">phonics</button>
+      <button class="ctrl-btn" onclick="qs('ocr')">OCR</button>
+      <button class="ctrl-btn" onclick="qs('color overlay')">color overlay</button>
+      <button class="ctrl-btn" onclick="qs('font')">font</button>
+    </div>
+    <div id="searchResults">
+      <div style="text-align:center;padding:70px;color:var(--text4);">
+        <div style="font-size:64px;margin-bottom:18px;">🔍</div>
+        <div style="font-size:17px;font-weight:600;color:var(--text2);">Search the LexiSense Knowledge Base</div>
+        <div style="font-size:13px;margin-top:8px;">Try searching for: dyslexia · reading tips · Bengali · phonics · OCR</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ DYSLEXIA CHECK ═══════ -->
+  <div class="page" id="page-dyslexia">
+    <div class="page-title">🧠 Dyslexia Check</div>
+    <div class="page-sub">AI-powered continuous assessment · Letter · Word Order · Speech · Personalised Report</div>
+    <div class="tabs" id="dysTabs">
+      <div class="tab active" onclick="dysTab('letter',this)">✏️ Letter Challenge</div>
+      <div class="tab" onclick="dysTab('word',this)">🔀 Word Order</div>
+      <div class="tab" onclick="dysTab('speech',this)">🎤 Speech Test</div>
+      <div class="tab" onclick="dysTab('report',this)">📋 My Report</div>
+    </div>
+    <!-- LETTER -->
+    <div id="dys-letter">
+      <div class="challenge-card">
+        <div style="font-size:13px;color:var(--text3);">Fill in the blank — choose the correct letter (b / d / p / q confusions)</div>
+        <div class="ch-word" id="chWord">Loading…</div>
+        <div style="font-size:13px;color:var(--text4);margin-bottom:10px;" id="chHint"></div>
+        <div class="ch-opts" id="chOpts"></div>
+        <div id="chFeedback" style="margin-top:10px;font-size:15px;font-weight:700;min-height:24px;"></div>
+        <div style="margin-top:16px;">
+          <div style="font-size:12px;color:var(--text3);margin-bottom:6px;">Error Frequency — same error = dyslexia indicator</div>
+          <div class="err-meter"><div class="err-fill" id="errFill" style="width:0%;"></div></div>
+          <div style="font-size:11px;color:var(--text4);" id="errCount">0 / 5 repetitive errors</div>
+        </div>
+      </div>
+      <div id="lRisk" style="margin-top:16px;"></div>
+      <button class="btn btn-ghost" style="margin-top:14px;" onclick="loadLetter()">↺ New Challenge</button>
+    </div>
+    <!-- WORD ORDER -->
+    <div id="dys-word" style="display:none;">
+      <div class="challenge-card">
+        <div style="font-size:13px;color:var(--text3);margin-bottom:14px;">Arrange the words into the correct sentence</div>
+        <div id="woHint" style="font-size:13px;color:var(--text4);margin-bottom:12px;font-style:italic;"></div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:6px;">Your sentence:</div>
+        <div class="tile-zone" id="woZone" ondrop="woDrop(event)" ondragover="event.preventDefault()"></div>
+        <div style="font-size:12px;color:var(--text3);margin:14px 0 6px;">Available words:</div>
+        <div class="tile-zone" id="woTiles"></div>
+        <div id="woFeedback" style="margin-top:14px;font-size:15px;font-weight:700;min-height:24px;"></div>
+        <div style="display:flex;gap:10px;margin-top:16px;">
+          <button class="btn btn-primary" onclick="checkWO()">✓ Check</button>
+          <button class="btn btn-ghost" onclick="loadWO()">↺ New</button>
+          <button class="btn btn-ghost" onclick="clearWO()">🗑 Clear</button>
+        </div>
+      </div>
+    </div>
+    <!-- SPEECH -->
+    <div id="dys-speech" style="display:none;">
+      <div class="grid g2">
+        <div class="card">
+          <div class="card-title">🎤 Read Aloud Test</div>
+          <div class="reading-area" id="passageText" style="margin-bottom:16px;">Click "New Passage" then read it aloud.</div>
+          <div style="background:var(--ink3);border:1px solid var(--border);border-radius:14px;padding:24px;text-align:center;">
+            <div style="font-size:13px;color:var(--text3);">Press mic and read the passage above</div>
+            <button class="mic-btn" id="micBtn" onclick="toggleMic()">🎤</button>
+            <div id="micStatus" style="font-size:12px;color:var(--text4);">Press to start recording</div>
+            <div class="transcript" id="transBox">Speech transcript will appear here…</div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:14px;">
+            <button class="btn btn-primary" onclick="loadPassage()">📝 New Passage</button>
+            <button class="btn btn-ghost" onclick="analyseSpeeech()">📊 Analyse</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">📊 Analysis Results</div>
+          <div id="speechResult">
+            <div style="text-align:center;padding:50px;color:var(--text4);">
+              <div style="font-size:48px;margin-bottom:12px;">🎤</div>
+              Read a passage and click Analyse to see results
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- REPORT -->
+    <div id="dys-report" style="display:none;">
+      <div class="grid g2">
+        <div class="card">
+          <div class="card-title">📋 Dyslexia Risk Report</div>
+          <div id="reportContent">
+            <div style="text-align:center;padding:40px;color:var(--text4);">
+              <div style="font-size:48px;margin-bottom:12px;">📊</div>Complete challenges first
+            </div>
+          </div>
+          <button class="btn btn-primary" style="width:100%;margin-top:14px;" onclick="loadReport()">🔄 Refresh Report</button>
+        </div>
+        <div class="card">
+          <div class="card-title">💡 Recommendations</div>
+          <div class="timeline">
+            <div class="tl-item"><div class="tl-dot done"></div><div class="tl-title">Use Lexend Font</div><div class="tl-sub">Designed to reduce visual stress for dyslexic readers</div></div>
+            <div class="tl-item"><div class="tl-dot done"></div><div class="tl-title">Enable Text-to-Speech</div><div class="tl-sub">Listen while reading to improve comprehension</div></div>
+            <div class="tl-item"><div class="tl-dot done"></div><div class="tl-title">Try Color Overlays</div><div class="tl-sub">Yellow or blue overlay reduces visual stress</div></div>
+            <div class="tl-item"><div class="tl-dot"></div><div class="tl-title">Daily Practice</div><div class="tl-sub">10–15 minutes per day shows significant improvement</div></div>
+            <div class="tl-item"><div class="tl-dot"></div><div class="tl-title">Consult a Specialist</div><div class="tl-sub">A trained professional provides formal diagnosis</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ SETTINGS ═══════ -->
+  <div class="page" id="page-settings">
+    <div class="page-title">⚙️ Reading Settings</div>
+    <div class="page-sub">Customise your reading experience · Saved to your database account</div>
+    <div class="grid g2">
+      <div>
+        <div class="card" style="margin-bottom:18px;">
+          <div class="card-title">Font & Display</div>
+          <div class="sl-wrap"><span class="sl-label">Font Size</span><input type="range" id="sFS" min="12" max="32" value="18" oninput="previewSett()"/><span class="sl-val" id="sFSv">18px</span></div>
+          <div class="sl-wrap"><span class="sl-label">Line Spacing</span><input type="range" id="sLS" min="1.2" max="3.5" step=".1" value="2.2" oninput="previewSett()"/><span class="sl-val" id="sLSv">2.2</span></div>
+          <div class="sl-wrap"><span class="sl-label">Letter Spacing</span><input type="range" id="sLT" min="0" max=".2" step=".01" value=".04" oninput="previewSett()"/><span class="sl-val" id="sLTv">0.04em</span></div>
+          <div style="margin-top:14px;">
+            <div style="font-size:12px;color:var(--text3);font-weight:600;margin-bottom:10px;">Color Overlay</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <div class="ctrl-btn on" id="ov-none" onclick="setOv('none',this)">None</div>
+              <div class="ctrl-btn" id="ov-y" onclick="setOv('rgba(255,220,0,.1)',this)" style="background:rgba(255,220,0,.08);">Yellow</div>
+              <div class="ctrl-btn" id="ov-b" onclick="setOv('rgba(100,180,255,.1)',this)" style="background:rgba(100,180,255,.08);">Blue</div>
+              <div class="ctrl-btn" id="ov-g" onclick="setOv('rgba(100,220,100,.1)',this)" style="background:rgba(100,220,100,.08);">Green</div>
+              <div class="ctrl-btn" id="ov-p" onclick="setOv('rgba(255,150,200,.1)',this)" style="background:rgba(255,150,200,.08);">Pink</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Reading Aids</div>
+          <div style="display:flex;flex-direction:column;gap:12px;font-size:14px;">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;"><input type="checkbox" id="sHL" checked/> Auto Word Highlighting</label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;"><input type="checkbox" id="sFoc"/> Focus Mode</label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;"><input type="checkbox" id="sRul" checked/> Reading Ruler</label>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:18px;">
+          <div class="card-title">Font Family</div>
+          <div style="display:flex;flex-direction:column;gap:8px;" id="sFontOpts">
+            <div class="ctrl-btn on" onclick="setFont('Lexend',this)" style="font-family:'Lexend';">Lexend — Designed for Dyslexia</div>
+            <div class="ctrl-btn" onclick="setFont('Outfit',this)" style="font-family:'Outfit';">Outfit — Modern & Clean</div>
+            <div class="ctrl-btn" onclick="setFont('Noto Sans Bengali',this)" style="font-family:'Noto Sans Bengali';">Noto Sans Bengali — বাংলা Support</div>
+            <div class="ctrl-btn" onclick="setFont('DM Mono',this)" style="font-family:'DM Mono';">DM Mono — Fixed Width</div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:18px;">
+          <div class="card-title">Live Preview</div>
+          <div id="settPrev" style="font-family:'Lexend',sans-serif;font-size:18px;line-height:2.2;background:var(--ink3);padding:20px;border-radius:12px;color:var(--text);letter-spacing:.04em;">This is how your text will look. বাংলা ভাষায় লেখাও এভাবেই দেখাবে।</div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;" onclick="saveSett()">💾 Save Settings to Database</button>
+        <div id="settMsg" style="margin-top:10px;font-size:12px;text-align:center;color:var(--emerald);min-height:20px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ PROGRESS ═══════ -->
+  <div class="page" id="page-progress">
+    <div class="page-title">📊 Progress & Analytics</div>
+    <div class="page-sub">Real-time data from database · Updates every session · Live dyslexia tracking</div>
+    <div class="grid g4" style="margin-bottom:22px;">
+      <div class="metric-card"><span class="metric-icon">📖</span><div class="metric-label">Total Words</div><div class="metric-value" id="p-words">—</div></div>
+      <div class="metric-card"><span class="metric-icon">📚</span><div class="metric-label">Vocabulary</div><div class="metric-value" id="p-vocab">—</div></div>
+      <div class="metric-card"><span class="metric-icon">⭐</span><div class="metric-label">Avg Score</div><div class="metric-value" id="p-score">—</div></div>
+      <div class="metric-card"><span class="metric-icon">🔥</span><div class="metric-label">Streak</div><div class="metric-value" id="p-streak">—</div></div>
+    </div>
+    <div class="grid g2" style="margin-bottom:22px;">
+      <div class="card">
+        <div class="card-title">📈 Skill Progress</div>
+        <div class="prog-header"><span>Reading Speed</span><span style="color:var(--glow2);" id="pr1">—</span></div>
+        <div class="prog-bar"><div class="prog-fill" id="pf1" style="width:0;background:linear-gradient(90deg,var(--glow),var(--glow2));"></div></div>
+        <div class="prog-header"><span>Comprehension</span><span style="color:var(--emerald);" id="pr2">—</span></div>
+        <div class="prog-bar"><div class="prog-fill" id="pf2" style="width:0;background:linear-gradient(90deg,var(--emerald),var(--teal));"></div></div>
+        <div class="prog-header"><span>Vocabulary Growth</span><span style="color:var(--teal);" id="pr3">—</span></div>
+        <div class="prog-bar"><div class="prog-fill" id="pf3" style="width:0;background:linear-gradient(90deg,var(--teal2),var(--teal));"></div></div>
+        <div class="prog-header"><span>Sessions Completed</span><span style="color:var(--amber);" id="pr4">—</span></div>
+        <div class="prog-bar"><div class="prog-fill" id="pf4" style="width:0;background:linear-gradient(90deg,var(--amber),var(--rose));"></div></div>
+        <div class="prog-header"><span>Mastered Words</span><span style="color:var(--rose);" id="pr5">—</span></div>
+        <div class="prog-bar"><div class="prog-fill" id="pf5" style="width:0;background:linear-gradient(90deg,var(--rose),var(--amber));"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 7-Day Reading Activity</div>
+        <div class="bar-chart" id="progChart"></div>
+        <div style="margin-top:16px;display:flex;justify-content:space-between;font-size:12px;color:var(--text3);">
+          <span>Time: <b id="pTime" style="color:var(--text);">—</b></span>
+          <span>Mastered: <b id="pMastered" style="color:var(--text);">—</b></span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🧠 Dyslexia Risk Overview</div>
+      <div id="progRisk">Loading…</div>
+    </div>
+  </div>
+
+  <!-- ═══════ DICTIONARY ═══════ -->
+  <div class="page" id="page-words">
+    <div class="page-title">💡 Word Dictionary</div>
+    <div class="page-sub">Look up any word · Bengali pronunciation · Personal vocabulary database</div>
+    <div class="card" style="margin-bottom:18px;">
+      <div style="display:flex;gap:10px;">
+        <input type="text" class="t-input" id="dictIn" style="flex:1;" placeholder="Type any word and press Enter…" onkeydown="if(event.key==='Enter')dictSearch()"/>
+        <button class="btn btn-primary" onclick="dictSearch()">🔍 Look Up</button>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+        <button class="ctrl-btn" onclick="qDict('dyslexia')">dyslexia</button>
+        <button class="ctrl-btn" onclick="qDict('cognition')">cognition</button>
+        <button class="ctrl-btn" onclick="qDict('phonetics')">phonetics</button>
+        <button class="ctrl-btn" onclick="qDict('literacy')">literacy</button>
+        <button class="ctrl-btn" onclick="qDict('algorithm')">algorithm</button>
+        <button class="ctrl-btn" onclick="qDict('language')">language</button>
+      </div>
+    </div>
+    <div class="grid g2">
+      <div class="card" id="dictResult" style="min-height:220px;">
+        <div style="text-align:center;padding:50px;color:var(--text4);">
+          <div style="font-size:48px;margin-bottom:12px;">📖</div>Search any word above
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">My Vocabulary</div>
+        <div id="vocabList" style="max-height:400px;overflow-y:auto;">
+          <div style="color:var(--text4);font-size:13px;text-align:center;padding:24px;">Loading…</div>
+        </div>
+        <button class="btn btn-ghost" style="width:100%;margin-top:12px;font-size:12px;" onclick="loadVocab()">↺ Refresh</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ ABOUT ═══════ -->
+  <div class="page" id="page-about">
+    <div class="page-title">ℹ️ About LexiSense AI</div>
+    <div class="page-sub">JIS College of Engineering · Department of Information Technology · JISTech2K26</div>
+    <div class="grid g2">
+      <div class="card">
+        <div class="card-title">Project Overview</div>
+        <p style="color:var(--text2);font-size:14px;line-height:1.9;margin-bottom:14px;">LexiSense AI is an intelligent reading assistant designed to improve accessibility for individuals with dyslexia. It combines artificial intelligence, natural language processing, optical character recognition, and speech synthesis into one complete platform.</p>
+        <p style="color:var(--text2);font-size:14px;line-height:1.9;margin-bottom:14px;">The system continuously assesses for dyslexia patterns through letter challenges, word order tests, and speech recognition — logging every error to generate a personalised risk report.</p>
+        <p style="color:var(--text2);font-size:14px;line-height:1.9;margin-bottom:14px;" style="font-family:'Noto Sans Bengali',sans-serif;">LexiSense AI বাংলা ভাষায় পড়া, লেখা এবং শোনার সম্পূর্ণ সুবিধা প্রদান করে। ডিসলেক্সিয়া আক্রান্ত শিক্ষার্থীদের জন্য এটি একটি অপরিহার্য সহায়ক।</p>
+        <div style="margin-top:18px;display:flex;gap:8px;flex-wrap:wrap;">
+          <span class="chip chip-v">AI Enabled</span>
+          <span class="chip chip-t">Bengali Support</span>
+          <span class="chip chip-g">OCR Ready</span>
+          <span class="chip chip-r">Dyslexia Focused</span>
+          <span class="chip chip-a">Multi-language</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">All Features</div>
+        <div class="timeline">
+          <div class="tl-item"><div class="tl-dot done"></div><div class="tl-title">🔐 Login & Sign Up</div><div class="tl-sub">SQLite user authentication with password hashing</div></div>
+          <div class="tl-item"><div class="tl-dot done"></div><div class="tl-title">🤖 AI Text Simplification</div><div class="tl-sub">80+ word replacements · English & Bengali</div></div>
+          <div class="tl-item"><div class="tl-dot done"></div><div class="tl-title">🇧🇩 Bengali Voice & OCR</div><div class="tl-sub">gTTS + Web Speech API · pytesseract ben+eng</div></div>
+          <div class="tl-item"><div class="tl-dot done"></div><div class="tl-title">📷 OCR Scanner</div><div class="tl-sub">Actual + AI Simplified text side by side</div></div>
+          <div class="tl-item"><div class="tl-dot done"></div><div class="tl-title">🌐 Universal Translator</div><div class="tl-sub">20+ languages · Live translation</div></div>
+          <div class="tl-item"><div class="tl-dot done"></div><div class="tl-title">🧠 Continuous Dyslexia AI</div><div class="tl-sub">3 test types · Pattern tracking · Risk report</div></div>
+          <div class="tl-item"><div class="tl-dot done"></div><div class="tl-title">🎤 Speech Recognition</div><div class="tl-sub">Read aloud test with accuracy analysis</div></div>
+          <div class="tl-item"><div class="tl-dot done"></div><div class="tl-title">📊 Real-time Analytics</div><div class="tl-sub">Live from database · 7-day charts</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  GLOBALS
+// ══════════════════════════════════════════════════════════
+const API='http://localhost:5000';
+let synth=window.speechSynthesis,isSpeaking=false,currentUtt=null;
+let sessionStart=Date.now(),wordsRead=0;
+let ocrActual='',ocrSimp='',ocrTabActive='actual';
+let dysTabActive='letter',letterData=null,woData=null;
+let srec=null,isRec=false,passage='',transcript='';
+let errCounts={};
+
+// ── API ────────────────────────────────────────────────────
+async function api(ep,method='GET',body=null,isForm=false){
+  try{
+    const o={method,credentials:'include',headers:isForm?{}:{'Content-Type':'application/json'}};
+    if(body) o.body=isForm?body:JSON.stringify(body);
+    const r=await fetch(API+ep,o);
+    return await r.json();
+  }catch(e){return null;}
+}
+
+// ══════════════════════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════════════════════
+function switchAuthTab(t,el){
+  document.querySelectorAll('.auth-tab').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('loginForm').style.display=t==='login'?'flex':'none';
+  document.getElementById('signupForm').style.display=t==='signup'?'flex':'none';
+}
+async function doLogin(){
+  const u=document.getElementById('lgUser').value.trim(),p=document.getElementById('lgPass').value;
+  if(!u||!p){document.getElementById('lgErr').textContent='Fill all fields';return;}
+  const d=await api('/api/auth/login','POST',{username:u,password:p});
+  if(d&&d.success){setUser(d.user);hideAuth();}
+  else document.getElementById('lgErr').textContent=(d&&d.error)||'Login failed';
+}
+async function doSignup(){
+  const n=document.getElementById('sgName').value.trim(),u=document.getElementById('sgUser').value.trim();
+  const em=document.getElementById('sgEmail').value.trim(),p=document.getElementById('sgPass').value;
+  if(!u||!em||!p){document.getElementById('sgErr').textContent='Fill all fields';return;}
+  const d=await api('/api/auth/signup','POST',{username:u,email:em,password:p,full_name:n});
+  if(d&&d.success){setUser(d.user);hideAuth();}
+  else document.getElementById('sgErr').textContent=(d&&d.error)||'Signup failed';
+}
+function skipAuth(){hideAuth();}
+function hideAuth(){document.getElementById('authScreen').style.display='none';appInit();}
+function setUser(u){
+  document.getElementById('userPill').style.display='flex';
+  document.getElementById('uName').textContent=u.full_name||u.username;
+  document.getElementById('uAvatar').textContent=(u.full_name||u.username).charAt(0).toUpperCase();
+}
+async function doLogout(){
+  await api('/api/auth/logout','POST');
+  document.getElementById('userPill').style.display='none';
+  document.getElementById('authScreen').style.display='flex';
+}
+
+// ══════════════════════════════════════════════════════════
+//  NAV
+// ══════════════════════════════════════════════════════════
+function nav(page,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(n=>n.classList.remove('active'));
+  const pg=document.getElementById('page-'+page);
+  if(pg)pg.classList.add('active');
+  if(el)el.classList.add('active');
+  else document.querySelectorAll('.sb-item').forEach(n=>{if(n.textContent.trim().toLowerCase().includes(page))n.classList.add('active');});
+  if(page==='progress')loadProgress();
+  if(page==='words')loadVocab();
+  if(page==='dyslexia'&&dysTabActive==='letter')loadLetter();
+  if(page==='dashboard')loadDash();
+}
+
+// ══════════════════════════════════════════════════════════
+//  SERVER CHECK
+// ══════════════════════════════════════════════════════════
+async function checkServer(){
+  const d=await api('/health');
+  const dot=document.getElementById('sDot'),txt=document.getElementById('sTxt'),hs=document.getElementById('hStatus');
+  if(d&&d.status==='ok'){
+    dot.classList.add('on');txt.textContent='Backend Online';
+    hs.textContent='✅ Server v'+d.version;hs.style.color='var(--emerald)';
+  }else{
+    dot.classList.remove('on');txt.textContent='Backend Offline';
+    hs.textContent='⚠️ Offline Mode';hs.style.color='var(--rose)';
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  DASHBOARD
+// ══════════════════════════════════════════════════════════
+async function loadDash(){
+  const d=await api('/api/analytics');
+  if(!d)return;
+  document.getElementById('m-words').textContent=d.total_words_read.toLocaleString();
+  document.getElementById('m-vocab').textContent=d.vocabulary_count;
+  document.getElementById('m-score').textContent=d.average_score+'%';
+  document.getElementById('m-streak').textContent=d.streak+' days';
+  setTimeout(()=>{
+    document.getElementById('mb1').style.width=Math.min(100,d.total_words_read/10)+'%';
+    document.getElementById('mb2').style.width=Math.min(100,d.vocabulary_count*5)+'%';
+    document.getElementById('mb3').style.width=d.average_score+'%';
+    document.getElementById('mb4').style.width=Math.min(100,d.streak*15)+'%';
+  },100);
+  buildChart('dashChart',d.chart_data);
+  const rc={Low:'var(--emerald)',Moderate:'var(--amber)',High:'var(--rose)'};
+  const ri={Low:'✅',Moderate:'⚠️',High:'🔴'};
+  document.getElementById('dashRisk').innerHTML=`
+    <div style="font-size:52px;margin-bottom:10px;">${ri[d.dyslexia_risk]||'🔍'}</div>
+    <div style="font-size:22px;font-weight:800;font-family:'Lexend',sans-serif;color:${rc[d.dyslexia_risk]||'var(--text3)'};">${d.dyslexia_risk} Risk</div>
+    <div style="font-size:12px;color:var(--text3);margin-top:6px;">Based on ${d.total_errors} tracked errors</div>`;
+}
+
+// ══════════════════════════════════════════════════════════
+//  SMART READER
+// ══════════════════════════════════════════════════════════
+function onLangChange(){
+  const bn=document.getElementById('rLang').value==='bn';
+  document.getElementById('speakBn').style.display=bn?'flex':'none';
+  document.getElementById('speakEn').style.display=bn?'none':'flex';
+}
+async function simplifyText(){
+  const text=document.getElementById('inputText').value.trim();
+  const lang=document.getElementById('rLang').value;
+  if(!text){notif('⚠️','Please enter some text');return;}
+  document.getElementById('outputText').innerHTML='<span class="spinner"></span> AI simplifying…';
+  const d=await api('/api/simplify','POST',{text,lang});
+  if(!d){document.getElementById('outputText').innerHTML='<span style="color:var(--rose);">Backend offline — start python run.py</span>';return;}
+  wordsRead+=d.word_count||0;
+  const words=d.simplified.split(/(\s+)/);
+  document.getElementById('outputText').innerHTML=words.map(w=>{
+    const c=w.replace(/[^a-zA-Z\u0980-\u09FF]/g,'');
+    return c?`<span class="word" onclick="qDict('${c.toLowerCase()}')" onmouseover="this.classList.add('hov')" onmouseout="this.classList.remove('hov')">${w}</span>`:w;
+  }).join('');
+  document.getElementById('wordsSimp').textContent=d.words_simplified+' words simplified';
+  document.getElementById('sentCount').textContent=d.sentences+' sentences';
+  calcReadability(text);
+}
+function calcReadability(text){
+  const w=text.split(/\s+/).filter(Boolean);
+  const s=(text.match(/[.!?]+/g)||[]).length||1;
+  const as=w.length/s;
+  const ay=w.reduce((a,x)=>a+Math.max(1,x.replace(/[^aeiouyAEIOUY]/g,'').length),0)/Math.max(1,w.length);
+  const fk=Math.max(0,Math.min(100,206.835-1.015*as-84.6*ay));
+  const grade=fk>90?'Very Easy':fk>70?'Easy':fk>50?'Standard':fk>30?'Difficult':'Very Difficult';
+  const deg=Math.round(fk/100*360);
+  const ring=document.getElementById('scoreRing');
+  ring.style.background=`conic-gradient(var(--glow) ${deg}deg,var(--ink3) ${deg}deg)`;
+  ring.textContent=Math.round(fk);
+  document.getElementById('scoreGrade').textContent=grade;
+  document.getElementById('scoreWords').textContent=w.length+' words · '+s+' sentences';
+}
+function loadSample(){document.getElementById('inputText').value='The quick brown fox demonstrates remarkable agility by jumping over the lazy dog. This comprehensive exercise utilizes all letters of the alphabet and is frequently employed in typography and font visualization to facilitate comprehensive testing of visual rendering systems.';calcReadability(document.getElementById('inputText').value);}
+function loadBengaliSample(){document.getElementById('rLang').value='bn';onLangChange();document.getElementById('inputText').value='সূর্য প্রতিদিন সকালে উদয় হয় এবং সন্ধ্যায় অস্ত যায়। এটি আমাদের আলো এবং উষ্ণতা প্রদান করে। সূর্য ছাড়া পৃথিবীতে কোনো জীবন থাকত না। বাংলা ভাষা একটি সুন্দর এবং সমৃদ্ধ ভাষা যা কোটি কোটি মানুষ ব্যবহার করেন।';}
+function clearText(){document.getElementById('inputText').value='';document.getElementById('outputText').innerHTML='<span style="color:var(--text4);">Simplified text will appear here…</span>';}
+function speakText(lang){
+  const text=document.getElementById('outputText').innerText||document.getElementById('inputText').value;
+  if(!text.trim()){notif('⚠️','No text to speak');return;}
+  synth.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  const voices=synth.getVoices().filter(v=>v.lang.startsWith(lang.split('-')[0]));
+  // For Bengali: prefer bn-BD or bn-IN voices; fallback to any bn voice
+  if(lang.startsWith('bn')){
+    const bnVoice=voices.find(v=>v.lang==='bn-BD')||voices.find(v=>v.lang==='bn-IN')||voices[0];
+    if(bnVoice)u.voice=bnVoice;
+    // If no native Bengali voice, use gTTS backend fallback via downloadMP3-style flow
+    if(!bnVoice){
+      notif('ℹ️','No Bengali voice on device — using gTTS audio…');
+      const textToSpeak=text;
+      fetch(API+'/api/tts',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:textToSpeak,lang:'bn'})})
+        .then(r=>{if(r.ok)return r.blob();throw new Error('gTTS failed');})
+        .then(blob=>{const a=new Audio(URL.createObjectURL(blob));a.play();window._readerAudio=a;document.getElementById('readerStopBtn').style.display='';a.onended=()=>{document.getElementById('readerStopBtn').style.display='none';};})
+        .catch(()=>notif('⚠️','Bengali voice unavailable. Install gTTS: pip install gtts'));
+      return;
+    }
+  } else {
+    if(voices[0])u.voice=voices[0];
+  }
+  u.lang=lang;u.rate=0.9;
+  u.onend=()=>{document.getElementById('readerStopBtn').style.display='none';};
+  u.onerror=()=>{document.getElementById('readerStopBtn').style.display='none';};
+  synth.speak(u);
+  document.getElementById('readerStopBtn').style.display='';
+}
+function stopReaderSpeech(){
+  synth.cancel();
+  if(window._readerAudio){window._readerAudio.pause();window._readerAudio.currentTime=0;window._readerAudio=null;}
+  document.getElementById('readerStopBtn').style.display='none';
+  notif('⏹','Stopped');
+}
+// Font/display controls
+const FS=[14,16,18,20,24,28,32];let fsi=2;
+function cycleFontSize(){fsi=(fsi+1)%FS.length;const s=FS[fsi];document.documentElement.style.setProperty('--fs',s+'px');document.getElementById('fsBtn').textContent='🔠 Font: '+s+'px';}
+const SP=[1.5,1.8,2.2,2.6,3.0,3.5];let spi=2;
+function cycleSpacing(){spi=(spi+1)%SP.length;const s=SP[spi];document.documentElement.style.setProperty('--lh',s);document.getElementById('lsBtn').textContent='↕ Spacing: '+s;}
+const OVS=['none','rgba(255,220,0,.12)','rgba(100,180,255,.12)','rgba(100,220,100,.12)','rgba(255,150,200,.12)'];
+const OVN=['No Overlay','Yellow','Blue','Green','Pink'];let ovi=0;
+function cycleOverlay(){ovi=(ovi+1)%OVS.length;document.getElementById('colorOverlay').style.background=OVS[ovi]==='none'?'transparent':OVS[ovi];document.getElementById('ovBtn').textContent='🎨 '+OVN[ovi];}
+let focOn=false;
+function toggleFocus(){focOn=!focOn;document.getElementById('focBtn').classList.toggle('on',focOn);document.getElementById('focBtn').textContent='👁 Focus: '+(focOn?'On':'Off');}
+let rulOn=false;
+function toggleRuler(){
+  rulOn=!rulOn;document.getElementById('rulBtn').textContent='📏 Ruler: '+(rulOn?'On':'Off');document.getElementById('rulBtn').classList.toggle('on',rulOn);
+  if(rulOn){document.addEventListener('mousemove',moveRuler);if(!document.getElementById('ruler'))makeRuler();}
+  else{document.removeEventListener('mousemove',moveRuler);const r=document.getElementById('ruler');if(r)r.remove();}
+}
+function makeRuler(){const r=document.createElement('div');r.id='ruler';r.style.cssText='position:fixed;left:0;right:0;height:30px;background:rgba(123,111,255,.1);border-top:1px solid rgba(123,111,255,.3);border-bottom:1px solid rgba(123,111,255,.3);pointer-events:none;z-index:999;';document.body.appendChild(r);}
+function moveRuler(e){const r=document.getElementById('ruler');if(r)r.style.top=(e.clientY-15)+'px';}
+async function exportPDF(){const text=document.getElementById('outputText').innerText||document.getElementById('inputText').value;const d=await api('/api/export/pdf','POST',{text});if(!d)notif('⚠️','PDF needs backend');}
+async function exportMP3(){const text=document.getElementById('outputText').innerText||document.getElementById('inputText').value;const lang=document.getElementById('rLang').value;const d=await api('/api/export/mp3','POST',{text,lang});if(!d)notif('⚠️','MP3 needs gTTS installed');}
+
+// ══════════════════════════════════════════════════════════
+//  OCR
+// ══════════════════════════════════════════════════════════
+function ocrDrop(e){e.preventDefault();document.getElementById('ocrZone').classList.remove('over');const f=e.dataTransfer.files[0];if(f)ocrProcess(f);}
+function ocrFileChange(e){const f=e.target.files[0];if(f)ocrProcess(f);}
+function ocrProcess(f){
+  const r=new FileReader();
+  r.onload=ev=>{
+    document.getElementById('ocrImg').src=ev.target.result;
+    document.getElementById('ocrPreview').style.display='block';
+    document.getElementById('ocrBtn').disabled=false;
+    document.getElementById('ocrClearBtn').style.display='';
+    document.getElementById('ocrStatus').textContent='Image ready — click Extract Text';
+  };
+  r.readAsDataURL(f);
+}
+async function runOCR(){
+  const fi=document.getElementById('ocrFile');
+  if(!fi.files[0]){notif('⚠️','Upload an image first');return;}
+  document.getElementById('ocrStatus').textContent='⏳ Extracting text…';
+  document.getElementById('ocrActual').textContent='Processing…';
+  const form=new FormData();form.append('image',fi.files[0]);form.append('lang',document.getElementById('ocrLang').value);
+  const d=await api('/api/ocr','POST',form,true);
+  if(!d||d.error){document.getElementById('ocrStatus').textContent='❌ '+(d&&d.error||'Backend offline');return;}
+  ocrActual=d.actual;ocrSimp=d.simplified;
+  document.getElementById('ocrActual').textContent=d.actual;
+  document.getElementById('ocrSimp').textContent=d.simplified;
+  document.getElementById('ocrStatus').textContent=d.ocr_real?'✅ Real OCR complete':'ℹ️ Demo mode (install Tesseract for real OCR)';
+  notif('📷','Text extracted!');
+}
+function ocrDemo(){
+  ocrActual='LexiSense AI is an intelligent reading assistant that helps people with dyslexia. The system demonstrates comprehensive natural language processing capabilities to facilitate better comprehension.';
+  ocrSimp='LexiSense AI is a smart reading helper that helps people with dyslexia. The system shows complete language tools to help better understanding.';
+  document.getElementById('ocrActual').textContent=ocrActual;
+  document.getElementById('ocrSimp').textContent=ocrSimp;
+  document.getElementById('ocrStatus').textContent='Demo text loaded';
+  document.getElementById('ocrClearBtn').style.display='';
+}
+function switchOCRTab(t,el){
+  ocrTabActive=t;
+  document.querySelectorAll('.ocr-tab').forEach(x=>x.classList.remove('active'));el.classList.add('active');
+  document.getElementById('ocrActual').style.display=t==='actual'?'block':'none';
+  document.getElementById('ocrSimp').style.display=t==='simplified'?'block':'none';
+}
+function speakOCR(lang){ttsNow(ocrTabActive==='actual'?ocrActual:ocrSimp,lang);}
+function copyOCR(){navigator.clipboard.writeText(ocrTabActive==='actual'?ocrActual:ocrSimp).then(()=>notif('📋','Copied!'));}
+function ocrToReader(){document.getElementById('inputText').value=ocrTabActive==='actual'?ocrActual:ocrSimp;nav('reader',null);}
+function clearOCR(){
+  // Reset image upload
+  document.getElementById('ocrFile').value='';
+  document.getElementById('ocrImg').src='';
+  document.getElementById('ocrPreview').style.display='none';
+  document.getElementById('ocrBtn').disabled=true;
+  document.getElementById('ocrClearBtn').style.display='none';
+  // Reset extracted text
+  ocrActual=''; ocrSimp='';
+  document.getElementById('ocrActual').textContent='Extracted text will appear here…';
+  document.getElementById('ocrSimp').textContent='AI simplified version will appear here…';
+  document.getElementById('ocrStatus').textContent='';
+  // Stop any ongoing speech
+  synth.cancel();
+  notif('🗑','OCR cleared');
+}
+
+// ══════════════════════════════════════════════════════════
+//  TTS
+// ══════════════════════════════════════════════════════════
+function updateVoices(){
+  const lang=document.getElementById('ttsLang').value;
+  const voices=synth.getVoices().filter(v=>v.lang.startsWith(lang.split('-')[0]));
+  const sel=document.getElementById('voiceSel');
+  sel.innerHTML=voices.map((v,i)=>`<option value="${i}">${v.name}</option>`).join('')||'<option>Default</option>';
+}
+synth.onvoiceschanged=updateVoices;setTimeout(updateVoices,600);
+function ttsBengaliSample(){document.getElementById('ttsLang').value='bn-BD';document.getElementById('ttsText').value='আমি বাংলায় কথা বলতে পারি। সূর্য প্রতিদিন উদয় হয় এবং অস্ত যায়। বাংলা একটি সুন্দর ভাষা। LexiSense AI সবার জন্য পড়া সহজ করে।';updateVoices();}
+function buildTTSDisplay(){
+  const text=document.getElementById('ttsText').value;
+  const parts=text.split(/(\s+)/);
+  document.getElementById('ttsDisplay').innerHTML=parts.map((w,i)=>w.trim()?`<span class="word" id="tw-${i}">${w}</span>`:w).join('');
+  return text;
+}
+function toggleTTS(){if(isSpeaking)pauseTTS();else startTTS();}
+function startTTS(){
+  const text=buildTTSDisplay();
+  const lang=document.getElementById('ttsLang').value;
+  const voices=synth.getVoices().filter(v=>v.lang.startsWith(lang.split('-')[0]));
+  const vi=parseInt(document.getElementById('voiceSel').value)||0;
+  const u=new SpeechSynthesisUtterance(text);
+  if(voices[vi])u.voice=voices[vi];
+  u.lang=lang;u.rate=parseFloat(document.getElementById('ttsRate').value);
+  u.pitch=parseFloat(document.getElementById('ttsPitch').value);
+  u.volume=parseFloat(document.getElementById('ttsVol').value);
+  currentUtt=u;
+  const wEls=document.querySelectorAll('[id^="tw-"]');
+  let wi=0;
+  u.onboundary=ev=>{
+    if(ev.name==='word'){
+      wEls.forEach(x=>x.classList.remove('current'));
+      while(wi<wEls.length&&!wEls[wi].textContent.trim())wi++;
+      if(wEls[wi])wEls[wi].classList.add('current');
+      wi++;
+      document.getElementById('ttsProg').style.width=(wi/wEls.length*100)+'%';
+      document.getElementById('ttsWordCount').textContent=`Word ${wi} of ${wEls.length}`;
+    }
+  };
+  u.onend=()=>{isSpeaking=false;document.getElementById('playBtn').textContent='▶ Play';document.getElementById('viz').classList.add('paused');wEls.forEach(x=>x.classList.remove('current'));};
+  synth.cancel();synth.speak(u);
+  isSpeaking=true;document.getElementById('playBtn').textContent='⏸ Pause';document.getElementById('viz').classList.remove('paused');
+}
+function pauseTTS(){
+  if(synth.speaking&&!synth.paused){synth.pause();isSpeaking=false;document.getElementById('playBtn').textContent='▶ Resume';document.getElementById('viz').classList.add('paused');}
+  else if(synth.paused){synth.resume();isSpeaking=true;document.getElementById('playBtn').textContent='⏸ Pause';document.getElementById('viz').classList.remove('paused');}
+}
+function stopTTS(){synth.cancel();isSpeaking=false;document.getElementById('playBtn').textContent='▶ Play';document.getElementById('viz').classList.add('paused');}
+function ttsNow(text,lang){
+  synth.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  const voices=synth.getVoices().filter(v=>v.lang.startsWith(lang.split('-')[0]));
+  if(voices[0])u.voice=voices[0];
+  u.lang=lang;u.rate=0.9;synth.speak(u);
+}
+function speakEl(elId,lang){ttsNow(document.getElementById(elId).value||document.getElementById(elId).textContent,lang==='auto'?'en-IN':lang);}
+async function downloadMP3(){
+  const text=document.getElementById('ttsText').value.trim();
+  const lang=document.getElementById('ttsLang').value.split('-')[0];
+  notif('⏳','Generating MP3…');
+  const r=await fetch(API+'/api/tts',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,lang})});
+  if(r.ok){const blob=await r.blob();const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='lexisense_audio.mp3';a.click();notif('🎵','MP3 downloaded!');}
+  else notif('⚠️','MP3 failed — install gTTS: pip install gtts');
+}
+
+// ══════════════════════════════════════════════════════════
+//  TRANSLATOR
+// ══════════════════════════════════════════════════════════
+let transTimer=null;
+function onTransInput(){clearTimeout(transTimer);transTimer=setTimeout(doTranslate,700);}
+async function doTranslate(){
+  const text=document.getElementById('transIn').value.trim();
+  const src=document.getElementById('srcLang').value;
+  const tgt=document.getElementById('tgtLang').value;
+  if(!text){document.getElementById('transOut').textContent='Translation…';return;}
+  document.getElementById('transOut').innerHTML='<span class="spinner"></span>';
+  const d=await api('/api/translate','POST',{text,source:src,target:tgt});
+  if(!d){document.getElementById('transOut').textContent='Translation failed — backend offline';return;}
+  document.getElementById('transOut').textContent=d.translated||d.error||'—';
+  if(d.detected)document.getElementById('transInfo').textContent=`Detected: ${d.detected}${d.demo?' (demo mode — install googletrans)':''}`;
+}
+function swapLangs(){
+  const s=document.getElementById('srcLang'),t=document.getElementById('tgtLang');
+  const inp=document.getElementById('transIn'),out=document.getElementById('transOut').textContent;
+  const sv=s.value;s.value=t.value;t.value=sv;
+  if(out&&out!=='Translation…')inp.value=out;
+  doTranslate();
+}
+function quickTrans(txt){document.getElementById('transIn').value=txt;doTranslate();}
+
+// ══════════════════════════════════════════════════════════
+//  SMART SEARCH
+// ══════════════════════════════════════════════════════════
+async function doSearch(){
+  const q=document.getElementById('searchIn').value.trim();
+  if(!q)return;
+  document.getElementById('searchResults').innerHTML='<div style="text-align:center;padding:40px;"><span class="spinner" style="width:30px;height:30px;border-width:3px;"></span></div>';
+  const d=await api('/api/search','POST',{query:q});
+  if(!d||!d.results){document.getElementById('searchResults').innerHTML='<div style="color:var(--rose);padding:20px;">Search failed.</div>';return;}
+  document.getElementById('searchResults').innerHTML=d.results.map(r=>`
+    <div class="s-result">
+      <div class="s-result-icon">${r.icon}</div>
+      <div style="flex:1;">
+        <div class="s-result-title">${r.title}</div>
+        <div class="s-result-snippet">${r.snippet}</div>
+        <div style="margin-top:8px;"><span class="chip chip-v">${r.type}</span></div>
+      </div>
+    </div>`).join('');
+}
+function qs(q){document.getElementById('searchIn').value=q;doSearch();}
+
+// ══════════════════════════════════════════════════════════
+//  DYSLEXIA CHECK
+// ══════════════════════════════════════════════════════════
+function dysTab(t,el){
+  dysTabActive=t;
+  document.querySelectorAll('#dysTabs .tab').forEach(x=>x.classList.remove('active'));el.classList.add('active');
+  ['letter','word','speech','report'].forEach(x=>document.getElementById('dys-'+x).style.display=x===t?'block':'none');
+  if(t==='letter')loadLetter();
+  if(t==='word')loadWO();
+  if(t==='report')loadReport();
+}
+// LETTER
+async function loadLetter(){
+  const d=await api('/api/dyslexia/challenge?type=letter');
+  letterData=d&&d.challenge?d.challenge:randomLC();
+  renderLetter(letterData);
+}
+function randomLC(){const lcs=[{word:"da_y",options:["b","d"],answer:"d",full:"day",type:"letter_reversal"},{word:"_ig",options:["b","p"],answer:"p",full:"pig",type:"letter_reversal"},{word:"_ell",options:["b","d"],answer:"b",full:"bell",type:"letter_confusion"}];return lcs[Math.floor(Math.random()*lcs.length)];}
+function renderLetter(c){
+  document.getElementById('chWord').textContent=c.word;
+  document.getElementById('chHint').textContent='Complete the word: '+c.full;
+  document.getElementById('chFeedback').textContent='';
+  document.getElementById('chOpts').innerHTML=c.options.map(o=>`<div class="ch-opt" onclick="checkLetter('${o}','${c.answer}','${c.type}','${c.full}',this)">${o}</div>`).join('');
+  updateErrMeter();
+}
+async function checkLetter(sel,correct,type,word,el){
+  document.querySelectorAll('.ch-opt').forEach(o=>o.onclick=null);
+  if(sel===correct){
+    el.classList.add('correct');document.getElementById('chFeedback').innerHTML='<span style="color:var(--emerald);">✅ Correct! Great job!</span>';
+    setTimeout(loadLetter,1300);
+  }else{
+    el.classList.add('wrong');
+    document.querySelectorAll('.ch-opt').forEach(o=>{if(o.textContent.trim()===correct)o.classList.add('correct');});
+    document.getElementById('chFeedback').innerHTML='<span style="color:var(--rose);">❌ Incorrect — answer was "'+correct+'"</span>';
+    const k=type+'_'+sel+'_vs_'+correct;errCounts[k]=(errCounts[k]||0)+1;updateErrMeter();
+    const ld=await api('/api/dyslexia/log-error','POST',{error_type:type,error_word:word});
+    if(ld&&ld.probability==='High'){
+      document.getElementById('lRisk').innerHTML=`<div class="risk-box risk-high">⚠️ HIGH Dyslexia Probability — ${ld.count}/5 repetitive errors<br><small style="font-weight:400;font-size:12px;">${ld.advice}</small></div>`;
+    }else if(ld){
+      document.getElementById('lRisk').innerHTML=`<div class="risk-box risk-low">🔍 Error logged (${ld.count}/5) — Keep practising!</div>`;
+    }
+    setTimeout(loadLetter,1900);
+  }
+}
+function updateErrMeter(){
+  const tot=Object.values(errCounts).reduce((a,b)=>a+b,0);
+  document.getElementById('errFill').style.width=Math.min(100,tot/5*100)+'%';
+  document.getElementById('errCount').textContent=tot+' / 5 repetitive errors';
+}
+// WORD ORDER
+async function loadWO(){
+  const d=await api('/api/dyslexia/challenge?type=word_order');
+  woData=d&&d.challenge?d.challenge:{scrambled:['The','cat','sat','on','the','mat'],correct:'The cat sat on the mat',hint:'A cat resting on a mat'};
+  document.getElementById('woHint').textContent='Hint: '+woData.hint;
+  document.getElementById('woZone').innerHTML='';document.getElementById('woFeedback').textContent='';
+  const shuffled=[...woData.scrambled].sort(()=>Math.random()-.5);
+  document.getElementById('woTiles').innerHTML=shuffled.map((w,i)=>`<div class="tile" draggable="true" id="wt-${i}" ondragstart="event.dataTransfer.setData('text','${i}')" onclick="woClick(this,'${i}')">${w}</div>`).join('');
+}
+function woDrop(e){e.preventDefault();const idx=e.dataTransfer.getData('text');const t=document.getElementById('wt-'+idx);if(t){const c=t.cloneNode(true);c.classList.add('placed');c.ondragstart=null;c.onclick=()=>{c.remove();t.style.display='';};document.getElementById('woZone').appendChild(c);t.style.display='none';}}
+function woClick(el,idx){const c=el.cloneNode(true);c.classList.add('placed');c.onclick=()=>{c.remove();el.style.display='';};document.getElementById('woZone').appendChild(c);el.style.display='none';}
+function checkWO(){
+  const placed=[...document.querySelectorAll('#woZone .tile')].map(t=>t.textContent.trim()).join(' ');
+  if(placed.toLowerCase()===woData.correct.toLowerCase())document.getElementById('woFeedback').innerHTML='<span style="color:var(--emerald);">✅ Correct! Well done!</span>';
+  else document.getElementById('woFeedback').innerHTML=`<span style="color:var(--rose);">❌ Correct: "${woData.correct}"</span>`;
+}
+function clearWO(){document.getElementById('woZone').innerHTML='';document.querySelectorAll('#woTiles .tile').forEach(t=>t.style.display='');}
+// SPEECH
+async function loadPassage(){
+  const d=await api('/api/dyslexia/challenge?type=speed');
+  passage=d&&d.challenge?d.challenge.text:'The quick brown fox jumps over the lazy dog near the river bank.';
+  document.getElementById('passageText').textContent=passage;
+  document.getElementById('transBox').textContent='Speech transcript will appear here…';
+  transcript='';
+}
+function toggleMic(){
+  if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){notif('⚠️','Speech recognition not supported — use Chrome');return;}
+  if(isRec)stopMic();else startMic();
+}
+function startMic(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  srec=new SR();srec.continuous=true;srec.interimResults=true;srec.lang='en-IN';
+  srec.onresult=e=>{let f='';for(let i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal)f+=e.results[i][0].transcript+' ';transcript+=f;document.getElementById('transBox').textContent=transcript;};
+  srec.onerror=e=>notif('⚠️','Mic error: '+e.error);
+  srec.start();isRec=true;
+  document.getElementById('micBtn').classList.add('rec');
+  document.getElementById('micStatus').textContent='🔴 Recording — speak now';
+}
+function stopMic(){if(srec)srec.stop();isRec=false;document.getElementById('micBtn').classList.remove('rec');document.getElementById('micStatus').textContent='Recording stopped';}
+function lev(a,b){const dp=Array(b.length+1).fill(null).map((_,i)=>i);for(let i=1;i<=a.length;i++){let p=i;for(let j=1;j<=b.length;j++){const v=a[i-1]===b[j-1]?dp[j-1]:1+Math.min(dp[j-1],p,dp[j]);dp[j-1]=p;p=v;}dp[b.length]=p;}return dp[b.length];}
+function analyseSpeeech(){
+  if(!transcript||!passage){notif('⚠️','Record your reading first');return;}
+  const tgt=passage.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/);
+  const spk=transcript.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/);
+  let correct=0;const errs=[];
+  const cmp=tgt.map(w=>{const m=spk.find(s=>s===w||lev(s,w)<2);if(m){correct++;return`<span style="background:rgba(0,214,143,.15);color:var(--emerald);border:1px solid rgba(0,214,143,.3);padding:2px 8px;border-radius:6px;font-size:13px;font-weight:600;margin:2px;">${w}</span>`;}errs.push(w);return`<span style="background:rgba(255,107,138,.15);color:var(--rose);border:1px solid rgba(255,107,138,.3);padding:2px 8px;border-radius:6px;font-size:13px;font-weight:600;margin:2px;">${w}</span>`;}).join(' ');
+  const acc=Math.round(correct/tgt.length*100);
+  const riskH=errs.length>tgt.length*.3;
+  document.getElementById('speechResult').innerHTML=`
+    <div style="text-align:center;margin-bottom:18px;">
+      <div style="font-size:44px;font-weight:500;font-family:'DM Mono',monospace;color:${acc>80?'var(--emerald)':acc>60?'var(--amber)':'var(--rose)'};">${acc}%</div>
+      <div style="font-size:14px;color:var(--text3);">Reading Accuracy</div>
+    </div>
+    <div style="margin-bottom:14px;line-height:2;">${cmp}</div>
+    <div style="${riskH?'background:rgba(255,107,138,.08);border:1px solid rgba(255,107,138,.25);':'background:rgba(0,214,143,.08);border:1px solid rgba(0,214,143,.25);'}padding:14px;border-radius:12px;">
+      <div style="font-weight:700;margin-bottom:5px;">${riskH?'⚠️ Possible reading difficulty detected':'✅ Good reading performance'}</div>
+      <div style="font-size:12px;color:var(--text3);">Correctly read ${correct}/${tgt.length} words${errs.length?' · Missed: '+errs.slice(0,5).join(', ')+(errs.length>5?'…':''):''}</div>
+    </div>`;
+}
+async function loadReport(){
+  const d=await api('/api/dyslexia/report');
+  if(!d){document.getElementById('reportContent').innerHTML='<div style="color:var(--rose);">Backend offline</div>';return;}
+  const rc={Low:'risk-low',Moderate:'risk-mod',High:'risk-high'};
+  const ri={Low:'✅',Moderate:'⚠️',High:'🔴'};
+  document.getElementById('reportContent').innerHTML=`
+    <div class="risk-box ${rc[d.risk_level]||'risk-low'}" style="margin-bottom:18px;">${ri[d.risk_level]||'🔍'} ${d.risk_level} Dyslexia Risk</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      <div style="background:var(--ink3);padding:14px;border-radius:10px;text-align:center;"><div style="font-size:26px;font-weight:500;font-family:'DM Mono',monospace;">${d.total_error_types}</div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;">Error Types</div></div>
+      <div style="background:var(--ink3);padding:14px;border-radius:10px;text-align:center;"><div style="font-size:26px;font-weight:500;font-family:'DM Mono',monospace;">${d.total_errors}</div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;">Total Errors</div></div>
+    </div>
+    ${d.error_details.length?d.error_details.map(e=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;"><span>${e.word} <span class="chip ${e.count>=5?'chip-r':'chip-a'}">${e.type.replace('_',' ')}</span></span><span style="font-family:'DM Mono',monospace;color:${e.count>=5?'var(--rose)':'var(--text3)'};">${e.count}×</span></div>`).join(''):'<div style="color:var(--text4);text-align:center;padding:24px;">No errors logged yet. Take the challenges!</div>'}`;
+}
+
+// ══════════════════════════════════════════════════════════
+//  SETTINGS
+// ══════════════════════════════════════════════════════════
+function previewSett(){
+  const fs=document.getElementById('sFS').value,ls=document.getElementById('sLS').value,lt=document.getElementById('sLT').value;
+  document.getElementById('sFSv').textContent=fs+'px';document.getElementById('sLSv').textContent=ls;document.getElementById('sLTv').textContent=lt+'em';
+  const p=document.getElementById('settPrev');p.style.fontSize=fs+'px';p.style.lineHeight=ls;p.style.letterSpacing=lt+'em';
+}
+function setFont(f,el){document.querySelectorAll('#sFontOpts .ctrl-btn').forEach(b=>b.classList.remove('on'));el.classList.add('on');document.getElementById('settPrev').style.fontFamily=f;document.documentElement.style.setProperty('--ff',f);}
+function setOv(c,el){document.querySelectorAll('[id^="ov-"]').forEach(b=>b.classList.remove('on'));el.classList.add('on');document.getElementById('colorOverlay').style.background=c==='none'?'transparent':c;}
+async function saveSett(){
+  const d=await api('/api/settings','POST',{font_size:+document.getElementById('sFS').value,line_spacing:+document.getElementById('sLS').value,letter_spacing:+document.getElementById('sLT').value,word_highlight:document.getElementById('sHL').checked?1:0,focus_mode:document.getElementById('sFoc').checked?1:0,ruler_mode:document.getElementById('sRul').checked?1:0});
+  const m=document.getElementById('settMsg');
+  if(d&&d.success){m.textContent='✅ Settings saved to database!';notif('💾','Settings saved!');}
+  else{m.textContent='⚠️ Backend offline';notif('⚠️','Offline');}
+  setTimeout(()=>m.textContent='',3500);
+}
+
+// ══════════════════════════════════════════════════════════
+//  PROGRESS
+// ══════════════════════════════════════════════════════════
+async function loadProgress(){
+  const d=await api('/api/analytics');if(!d)return;
+  document.getElementById('p-words').textContent=d.total_words_read.toLocaleString();
+  document.getElementById('p-vocab').textContent=d.vocabulary_count;
+  document.getElementById('p-score').textContent=d.average_score+'%';
+  document.getElementById('p-streak').textContent=d.streak+' days';
+  document.getElementById('pTime').textContent=d.total_duration_minutes+'m';
+  document.getElementById('pMastered').textContent=d.mastered_words+' words';
+  const sc=d.average_score;
+  setTimeout(()=>{
+    document.getElementById('pf1').style.width=Math.round(sc*.9)+'%';document.getElementById('pr1').textContent=Math.round(sc*.9)+'%';
+    document.getElementById('pf2').style.width=sc+'%';document.getElementById('pr2').textContent=sc+'%';
+    document.getElementById('pf3').style.width=Math.min(100,d.vocabulary_count*5)+'%';document.getElementById('pr3').textContent=Math.min(100,d.vocabulary_count*5)+'%';
+    document.getElementById('pf4').style.width=Math.min(100,d.total_sessions*10)+'%';document.getElementById('pr4').textContent=d.total_sessions+' sessions';
+    document.getElementById('pf5').style.width=Math.min(100,d.mastered_words*10)+'%';document.getElementById('pr5').textContent=d.mastered_words+' words';
+  },200);
+  buildChart('progChart',d.chart_data);
+  const rc={Low:'var(--emerald)',Moderate:'var(--amber)',High:'var(--rose)'};
+  document.getElementById('progRisk').innerHTML=`
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+      <div style="font-size:52px;">${d.dyslexia_risk==='Low'?'✅':d.dyslexia_risk==='Moderate'?'⚠️':'🔴'}</div>
+      <div><div style="font-size:22px;font-weight:800;font-family:'Lexend',sans-serif;color:${rc[d.dyslexia_risk]||'var(--text3)'};">${d.dyslexia_risk} Risk</div>
+      <div style="font-size:13px;color:var(--text3);">Based on ${d.total_errors} tracked errors across all tests</div></div>
+      <button class="btn btn-primary" style="margin-left:auto;" onclick="nav('dyslexia',null)">Take Full Test</button>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════════════
+//  DICTIONARY
+// ══════════════════════════════════════════════════════════
+function dictSearch(){qDict(document.getElementById('dictIn').value.trim());}
+async function qDict(word){
+  if(!word)return;
+  document.getElementById('dictResult').innerHTML='<div style="text-align:center;padding:32px;"><span class="spinner" style="width:26px;height:26px;border-width:2px;"></span></div>';
+  const d=await api('/api/lookup','POST',{word});
+  if(!d){document.getElementById('dictResult').innerHTML='<div style="color:var(--rose);padding:24px;">Backend offline.</div>';return;}
+  const dc={easy:'var(--emerald)',medium:'var(--amber)',hard:'var(--rose)',unknown:'var(--text3)'};
+  document.getElementById('dictResult').innerHTML=`
+    <div class="word-big">${d.word||word}</div>
+    <div class="word-phon">${d.phonetic||''}</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+      <span class="chip chip-v">${d.type||'word'}</span>
+      ${d.difficulty?`<span class="chip" style="background:rgba(0,0,0,.3);color:${dc[d.difficulty]||'var(--text3)'};">${d.difficulty}</span>`:''}
+    </div>
+    <div style="font-size:14px;color:var(--text);margin-bottom:10px;line-height:1.8;">${d.meaning||'Definition not found.'}</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:10px;padding:12px 14px;background:var(--ink3);border-radius:10px;">💡 <b>Simple:</b> ${d.simple||'—'}</div>
+    ${d.synonyms&&d.synonyms.length?`<div style="font-size:12px;color:var(--text3);margin-bottom:10px;">Synonyms: ${d.synonyms.join(', ')}</div>`:''}
+    ${d.example?`<div style="font-size:13px;font-style:italic;color:var(--text3);border-left:2px solid var(--glow);padding-left:12px;margin:12px 0;">"${d.example}"</div>`:''}
+    <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="ttsNow('${word}','en-IN')" style="font-size:12px;padding:8px 16px;">🔊 English</button>
+      <button class="btn btn-ghost" onclick="ttsNow('${word}','bn-BD')" style="font-size:12px;padding:8px 16px;">🗣 বাংলা</button>
+      <button class="btn btn-ghost" onclick="api('/api/vocabulary/master','POST',{word:'${word}'}).then(()=>notif('★','Mastered!'))" style="font-size:12px;padding:8px 16px;">★ Master</button>
+    </div>`;
+  document.getElementById('dictIn').value=word;
+}
+async function loadVocab(){
+  const d=await api('/api/vocabulary');
+  const el=document.getElementById('vocabList');
+  if(!d||!d.vocabulary||!d.vocabulary.length){el.innerHTML='<div style="color:var(--text4);font-size:13px;text-align:center;padding:24px;">No words yet. Click words in Smart Reader!</div>';return;}
+  el.innerHTML=d.vocabulary.map(w=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+      <div><div style="font-weight:700;font-family:'Lexend',sans-serif;font-size:13px;">${w.word} ${w.mastered?'<span style="color:var(--amber);">★</span>':''}</div>
+      <div style="font-size:11px;color:var(--text4);">Looked up ${w.times_looked_up}×</div></div>
+      <button class="btn btn-ghost" onclick="qDict('${w.word}')" style="font-size:11px;padding:5px 12px;">View</button>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+//  CHART
+// ══════════════════════════════════════════════════════════
+function buildChart(id,data){
+  const el=document.getElementById(id);if(!el||!data||!data.length)return;
+  const max=Math.max(...data.map(d=>d.words),1);
+  el.innerHTML=data.map(d=>{
+    const h=Math.max(5,Math.round(d.words/max*100));
+    return`<div class="bar-wrap"><div class="bar" style="height:${h}%;background:linear-gradient(to top,var(--glow),var(--teal));" title="${d.words} words"></div><div class="bar-label">${d.date?d.date.split(' ')[0]:''}</div></div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+//  NOTIFICATIONS
+// ══════════════════════════════════════════════════════════
+function notif(icon,text){
+  const area=document.getElementById('notifArea');
+  const n=document.createElement('div');n.className='notif';
+  n.innerHTML=`<div class="notif-icon">${icon}</div><div class="notif-text">${text}</div>`;
+  area.appendChild(n);
+  setTimeout(()=>n.classList.add('notif-out'),3000);setTimeout(()=>n.remove(),3500);
+  if(area.children.length>4)area.firstChild.remove();
+}
+
+// ══════════════════════════════════════════════════════════
+//  PARTICLES
+// ══════════════════════════════════════════════════════════
+function makeParticles(){
+  const c=document.getElementById('particles');
+  const colors=['rgba(123,111,255,.6)','rgba(0,229,204,.5)','rgba(255,107,138,.4)','rgba(255,179,71,.4)'];
+  for(let i=0;i<20;i++){
+    const p=document.createElement('div');p.className='particle';
+    const sz=1+Math.random()*3;
+    p.style.cssText=`left:${Math.random()*100}%;width:${sz}px;height:${sz}px;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${10+Math.random()*20}s;animation-delay:${Math.random()*20}s;`;
+    c.appendChild(p);
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  SESSION
+// ══════════════════════════════════════════════════════════
+async function logSession(){
+  const dur=Math.round((Date.now()-sessionStart)/1000);
+  await api('/api/session/log','POST',{words_read:wordsRead,duration:dur,score:75});
+}
+
+// ══════════════════════════════════════════════════════════
+//  APP INIT
+// ══════════════════════════════════════════════════════════
+async function appInit(){
+  makeParticles();checkServer();
+  const me=await api('/api/auth/me');
+  if(me&&me.logged_in)setUser(me.user);
+  loadDash();updateVoices();
+  buildTTSDisplay();
+  calcReadability(document.getElementById('inputText').value);
+  setTimeout(()=>notif('🚀','LexiSense AI v3.0 Ready!'),700);
+  window.addEventListener('beforeunload',logSession);
+}
+// Auto-start if backend is offline (skip auth gracefully)
+window.addEventListener('load',async()=>{
+  const d=await api('/health');
+  if(!d){document.getElementById('authScreen').style.display='none';appInit();}
+});
+</script>
+</body>
+</html>
